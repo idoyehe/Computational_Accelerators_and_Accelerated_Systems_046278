@@ -1,0 +1,2 @@
+# Computational_Accelerators_and_Accelerated_Systems_046278
+HW assignments in Computational Accelerators and Accelerated Systems 046278 Technion

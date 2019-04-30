@@ -68,11 +68,29 @@ long long int distance_sqr_between_image_arrays(uchar *img_arr1, uchar *img_arr2
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 __device__ uchar arr_min(uchar arr[], int arr_size) {
-    return 0; //TODO
+    int tid = threadIdx.x;
+    int half_length = arr_size / 2;
+    uchar min = 255;
+    while (half_length >= 1) {
+        uchar current_min = A[tid + half_length] * (A[tid] > A[tid + half_length])
+                + A[tid] * (A[tid] <= A[tid + half_length]);
+       min = current_min * ( min >  current_min) + min * (min <= current_min);
+       __syncthreads();
+       half_length /= 2;
+    }
+    return min;
 }
 
 __device__ void prefix_sum(int arr[], int arr_size) {
-    return; //TODO
+    int tid = threadIdx.x;
+    int increment;
+    for (int stride = 1; stride < blockDim.x; stride *= 2) {
+        increment = arr[tid - stride] * (tid >= stride);
+        __syncthreads();
+        arr[tid] += increment * (tid >= stride);
+        __syncthreads();
+    }
+    return;
 }
 
 __global__ void process_image_kernel(uchar *in, uchar *out) {

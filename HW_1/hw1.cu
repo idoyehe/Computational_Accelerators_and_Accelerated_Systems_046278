@@ -163,7 +163,7 @@ int main() {
     for (int i = 0; i < HISTOGRAM_SIZE; i++) {
         printf("temp[%d] = %d\n", i,temp[i]);
     }
-    printf("The minimum is: %d\n", temp[HISTOGRAM_SIZE])
+    printf("The minimum is: %d\n", temp[HISTOGRAM_SIZE]);
     free(temp);
 
     //TODO: in a for loop:

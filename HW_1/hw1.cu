@@ -160,12 +160,12 @@ int main() {
 
     CUDA_CHECK( cudaMemcpy(image_in_device_serial,temp,HISTOGRAM_SIZE * sizeof(int), cudaMemcpyHostToDevice));
     process_image_kernel<<<1,HISTOGRAM_SIZE >>>(image_in_device_serial,image_out_device_serial);
-    CUDA_CHECK( cudaMemcpy(temp,image_out_device_serial,(1+HISTOGRAM_SIZE) * sizeof(int),cudaMemcpyDeviceToHost));
-    for (int i = 0; i < HISTOGRAM_SIZE; i++) {
-        printf("temp[%d] = %d\n", i,temp[i]);
-    }
-    printf("The minimum is: %d\n", temp[HISTOGRAM_SIZE]);
-    free(temp);
+//    CUDA_CHECK( cudaMemcpy(temp,image_out_device_serial,(1+HISTOGRAM_SIZE) * sizeof(int),cudaMemcpyDeviceToHost));
+//    for (int i = 0; i < HISTOGRAM_SIZE; i++) {
+//        printf("temp[%d] = %d\n", i,temp[i]);
+//    }
+//    printf("The minimum is: %d\n", temp[HISTOGRAM_SIZE]);
+//    free(temp);
 
     //TODO: in a for loop:
     //   1. copy the relevant image from images_in to the GPU memory you allocated

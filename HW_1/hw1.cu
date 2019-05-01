@@ -75,9 +75,12 @@ __device__ int array_min_positive(int *arr, int len){
     min_arr[tid] = arr[tid]; //copy the arr to preserve it
     int half_size = len /2;
     while (half_size >=1){
-    	bool change_flag = (min_arr[tid + half_size] > 0 && min_arr[tid] >
-    	min_arr[tid + half_size] || min_arr[tid == 0]);
-    		min_arr[tid] = change_flag * min_arr[tid + half_size] + (!change_flag) * min_arr[tid];
+        if (tid < half_length) {
+            bool change_flag = (min_arr[tid + half_size] > 0 && min_arr[tid] > min_arr[tid + half_size] ||
+                                min_arr[tid == 0]);
+            min_arr[tid] = change_flag * min_arr[tid + half_size] +
+                           (!change_flag) * min_arr[tid];
+        }
         __syncthreads();
     	half_size /=2;
     }
@@ -99,11 +102,11 @@ __device__ void prefix_sum(int *arr, int len){
 
 __global__ void process_image_kernel(int *in, int *out) {
     int tid = threadIdx.x;
-//    int res = array_min_positive(in,HISTOGRAM_SIZE);
+    int res = array_min_positive(in,HISTOGRAM_SIZE);
     prefix_sum(in,HISTOGRAM_SIZE);
     out[tid]=in[tid];
     if(tid ==0) {
-        out[HISTOGRAM_SIZE] = 0;
+        out[HISTOGRAM_SIZE] = res;
     }
     return ;
 }

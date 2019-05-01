@@ -7,6 +7,7 @@
 #define IMG_HEIGHT 256
 #define IMG_WIDTH 256
 #define N_IMAGES 10000
+#define HISTOGRAM_SIZE 256
 
 typedef unsigned char uchar;
 
@@ -68,20 +69,23 @@ long long int distance_sqr_between_image_arrays(uchar *img_arr1, uchar *img_arr2
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 __device__ uchar arr_min(uchar arr[], int arr_size) {
+	/*assuming threadblock size is the same as arr_size*/
     int tid = threadIdx.x;
-    int half_length = arr_size / 2;
-    uchar min = 255;
-    while (half_length >= 1) {
-        uchar current_min = A[tid + half_length] * (A[tid] > A[tid + half_length])
-                + A[tid] * (A[tid] <= A[tid + half_length]);
-       min = current_min * ( min >  current_min) + min * (min <= current_min);
-       __syncthreads();
-       half_length /= 2;
+    __shared__ uchar min_arr[HISTOGRAM_SIZE];
+    min_arr[tid] = arr[tid];
+    int half_size = arr_size /2;
+    while (half_size >=1){
+    	if (min_arr[tid] > min_arr[tid + half_size] &&  min_arr[tid + half_size] > 0){// optimized
+    		min_arr[tid] = min_arr[tid + half_size];
+    	}
+    	__syncthreads();
+    	half_size /=2;
     }
-    return min;
+    return min_arr[0];
 }
 
 __device__ void prefix_sum(int arr[], int arr_size) {
+	/*assuming threadblock size is the same as arr_size*/
     int tid = threadIdx.x;
     int increment;
     for (int stride = 1; stride < blockDim.x; stride *= 2) {
@@ -141,17 +145,17 @@ int main() {
     t_finish = get_time_msec(); //Do not change
     distance_sqr = distance_sqr_between_image_arrays(images_out_cpu, images_out_gpu_serial); // Do not change
     printf("total time %f [msec]  distance from baseline %lld (should be zero)\n", t_finish - t_start, distance_sqr); //Do not change
-
-    // GPU bulk
-    printf("\n=== GPU Bulk ===\n"); //Do not change
-    //TODO: allocate GPU memory for a all input images and all output images
-    t_start = get_time_msec(); //Do not change
-    //TODO: copy all input images from images_in to the GPU memory you allocated
-    //TODO: invoke a kernel with N_IMAGES threadblocks, each working on a different image
-    //TODO: copy output images from GPU memory to images_out_gpu_bulk
-    t_finish = get_time_msec(); //Do not change
-    distance_sqr = distance_sqr_between_image_arrays(images_out_cpu, images_out_gpu_bulk); // Do not change
-    printf("total time %f [msec]  distance from baseline %lld (should be zero)\n", t_finish - t_start, distance_sqr); //Do not chhange
+//
+//    // GPU bulk
+//    printf("\n=== GPU Bulk ===\n"); //Do not change
+//    //TODO: allocate GPU memory for a all input images and all output images
+//    t_start = get_time_msec(); //Do not change
+//    //TODO: copy all input images from images_in to the GPU memory you allocated
+//    //TODO: invoke a kernel with N_IMAGES threadblocks, each working on a different image
+//    //TODO: copy output images from GPU memory to images_out_gpu_bulk
+//    t_finish = get_time_msec(); //Do not change
+//    distance_sqr = distance_sqr_between_image_arrays(images_out_cpu, images_out_gpu_bulk); // Do not change
+//    printf("total time %f [msec]  distance from baseline %lld (should be zero)\n", t_finish - t_start, distance_sqr); //Do not chhange
 
     return 0;
 }

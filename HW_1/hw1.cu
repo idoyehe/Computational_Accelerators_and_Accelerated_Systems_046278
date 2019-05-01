@@ -145,7 +145,8 @@ int main() {
 
     //TODO: allocate GPU memory for a single input image and a single output image
 //    t_start = get_time_msec(); //Do not change
-    int temp[256];
+    int* temp;
+    temp = malloc(sizeof(int)*HISTOGRAM_SIZE);
     for (int i = 0; i < HISTOGRAM_SIZE; i++) {
         temp[i] = 1;
     }
@@ -157,6 +158,7 @@ int main() {
     for (int i = 0; i < HISTOGRAM_SIZE; i++) {
         printf("temp[i] = %d\n", temp[i]);
     }
+    free(temp);
 
     //TODO: in a for loop:
     //   1. copy the relevant image from images_in to the GPU memory you allocated

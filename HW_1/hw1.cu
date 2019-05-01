@@ -103,7 +103,7 @@ __global__ void process_image_kernel(int *in, int *out) {
     prefix_sum(in,HISTOGRAM_SIZE);
     out[tid]=in[tid];
     if(tid ==0) {
-        out[HISTOGRAM_SIZE] = in[HISTOGRAM_SIZE];
+        out[HISTOGRAM_SIZE] = res;
     }
     return ;
 }
@@ -151,10 +151,11 @@ int main() {
 //    t_start = get_time_msec(); //Do not change
     int* temp;
     temp =(int*)malloc(sizeof(int)*(HISTOGRAM_SIZE+1));
-    temp[0] = 0;
-    for (int i = 1; i < HISTOGRAM_SIZE; i++) {
+    for (int i = 0; i < HISTOGRAM_SIZE; i++) {
         temp[i] = 1;
     }
+    temp[0] = 0;
+    temp[HISTOGRAM_SIZE] = 0;
 
 
     CUDA_CHECK( cudaMemcpy(image_in_device_serial,temp,HISTOGRAM_SIZE * sizeof(int), cudaMemcpyHostToDevice));

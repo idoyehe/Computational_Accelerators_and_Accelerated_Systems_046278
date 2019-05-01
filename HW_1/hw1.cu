@@ -75,7 +75,7 @@ __device__ int array_min_positive(int *arr, int len){
     min_arr[tid] = arr[tid]; //copy the arr to preserve it
     int half_size = len /2;
     while (half_size >=1){
-        if (tid < half_length) {
+        if (tid < half_size) {
             bool change_flag = (min_arr[tid + half_size] > 0 && min_arr[tid] > min_arr[tid + half_size] ||
                                 min_arr[tid == 0]);
             min_arr[tid] = change_flag * min_arr[tid + half_size] +

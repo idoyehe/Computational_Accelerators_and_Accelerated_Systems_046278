@@ -145,27 +145,30 @@ int main() {
     printf("\n=== GPU Task Serial ===\n"); //Do not change
     int *image_in_device_serial, *image_out_device_serial;
     CUDA_CHECK(cudaMalloc((void **)&image_in_device_serial,HISTOGRAM_SIZE * sizeof(int)));
-    CUDA_CHECK(cudaMalloc((void **)&image_out_device_serial,257 * sizeof(int)));
+    CUDA_CHECK(cudaMalloc((void **)&image_out_device_serial,(1+HISTOGRAM_SIZE) * sizeof(int)));
 
     //TODO: allocate GPU memory for a single input image and a single output image
 //    t_start = get_time_msec(); //Do not change
     int* temp;
-    temp =(int*)malloc(sizeof(int)*257);
+    temp =(int*)malloc(sizeof(int)*(HISTOGRAM_SIZE));
     for (int i = 0; i < HISTOGRAM_SIZE; i++) {
         temp[i] = 1;
     }
     temp[0] = 0;
-    temp[HISTOGRAM_SIZE] = 1000000;
+
+    int *temp_out =(int*)malloc(sizeof(int)*(HISTOGRAM_SIZE+1));
 
 
     CUDA_CHECK( cudaMemcpy(image_in_device_serial,temp,HISTOGRAM_SIZE * sizeof(int), cudaMemcpyHostToDevice));
     process_image_kernel<<<1,HISTOGRAM_SIZE >>>(image_in_device_serial,image_out_device_serial);
-    CUDA_CHECK( cudaMemcpy(temp,image_out_device_serial,257 * sizeof(int),cudaMemcpyDeviceToHost));
-//    for (int i = 0; i < HISTOGRAM_SIZE; i++) {
-//        printf("temp[%d] = %d\n", i,temp[i]);
-//    }
-//    printf("The minimum is: %d\n", temp[HISTOGRAM_SIZE]);
-//    free(temp);
+    CUDA_CHECK( cudaMemcpy(temp_out,image_out_device_serial,(1+HISTOGRAM_SIZE) * sizeof(int),cudaMemcpyDeviceToHost));
+    for (int i = 0; i < HISTOGRAM_SIZE; i++) {
+        printf("temp[%d] = %d\n", i,temp_out[i]);
+    }
+    printf("The minimum is: %d\n", temp_out[HISTOGRAM_SIZE]);
+    free(temp);
+    free(temp_out);
+
 
     //TODO: in a for loop:
     //   1. copy the relevant image from images_in to the GPU memory you allocated

@@ -68,24 +68,25 @@ long long int distance_sqr_between_image_arrays(uchar *img_arr1, uchar *img_arr2
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-__device__ uchar arr_min(uchar arr[], int arr_size) {
+__device__ int array_min_positive(int *arr, int len)
 	/*assuming threadblock size is the same as arr_size*/
     int tid = threadIdx.x;
     __shared__ uchar min_arr[HISTOGRAM_SIZE];
-    min_arr[tid] = arr[tid];
-    int half_size = arr_size /2;
+    min_arr[tid] = arr[tid]; //copy the arr to preserve it
+    int half_size = len /2;
     while (half_size >=1){
-    	if (min_arr[tid] > min_arr[tid + half_size] &&  min_arr[tid + half_size] > 0){// optimized
-    		min_arr[tid] = min_arr[tid + half_size];
+    	bool change_flag = (min_arr[tid + half_size] > 0 && min_arr[tid] >
+    	min_arr[tid + half_size] || min_arr[tid == 0]);
+    		min_arr[tid] = change_flag * min_arr[tid + half_size] + (!change_flag) * min_arr[tid];
     	}
-    	__syncthreads();
+        __syncthreads();
     	half_size /=2;
     }
     return min_arr[0];
 }
 
-__device__ void prefix_sum(int arr[], int arr_size) {
-	/*assuming threadblock size is the same as arr_size*/
+__device__ int prefix_sum(int *arr, int len){
+/*assuming threadblock size is the same as arr_size*/
     int tid = threadIdx.x;
     int increment;
     for (int stride = 1; stride < blockDim.x; stride *= 2) {
@@ -136,6 +137,7 @@ int main() {
 
     // GPU task serial computation
     printf("\n=== GPU Task Serial ===\n"); //Do not change
+//    CUDA_CHECK(cudaMalloc())
     //TODO: allocate GPU memory for a single input image and a single output image
     t_start = get_time_msec(); //Do not change
     //TODO: in a for loop:

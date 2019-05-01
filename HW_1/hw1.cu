@@ -161,7 +161,7 @@ int main() {
     process_image_kernel<<<1,HISTOGRAM_SIZE >>>(image_in_device_serial,image_out_device_serial);
     CUDA_CHECK( cudaMemcpy(temp,image_out_device_serial,HISTOGRAM_SIZE * sizeof(int),cudaMemcpyDeviceToHost));
     for (int i = 0; i < HISTOGRAM_SIZE; i++) {
-        printf("temp[i] = %d\n", temp[i]);
+        printf("temp[%d] = %d\n", i,temp[i]);
     }
     printf("The minimum is: %d\n", temp[HISTOGRAM_SIZE])
     free(temp);

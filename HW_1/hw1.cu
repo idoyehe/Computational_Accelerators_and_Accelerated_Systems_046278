@@ -98,8 +98,11 @@ __device__ int prefix_sum(int *arr, int len){
     return;
 }
 
-__global__ void process_image_kernel(uchar *in, uchar *out) {
-    return ; //TODO
+__global__ void process_image_kernel(int *in, int *out) {
+    int tid = threadIdx.x;
+    prefix_sum(in);
+    out[tid]=in[tid];
+    return ;
 }
 
 int main() {
@@ -137,16 +140,32 @@ int main() {
 
     // GPU task serial computation
     printf("\n=== GPU Task Serial ===\n"); //Do not change
-//    CUDA_CHECK(cudaMalloc())
+    int *images_in_gpu_serial, *images_out_gpu_serial;
+    CUDA_CHECK(cudaMalloc((void **)&images_in_gpu_serial,HISTOGRAM_SIZE));
+    CUDA_CHECK(cudaMalloc((void **)&images_out_gpu_serial,HISTOGRAM_SIZE));
+
     //TODO: allocate GPU memory for a single input image and a single output image
-    t_start = get_time_msec(); //Do not change
+//    t_start = get_time_msec(); //Do not change
+    int temp[256];
+    for (int i = 0; i < HISTOGRAM_SIZE; i++) {
+        temp[i] = 1;
+    }
+
+
+    CUDA_CHECK( cudaMemcpy(images_in_gpu_serial,temp,HISTOGRAM_SIZE * sizeof(int), cudaMemcpyHostToDevice));
+    process_image_kernel<<<1,HISTOGRAM_SIZE >>>(images_in_gpu_serial,images_out_gpu_serial);
+    CUDA_CHECK( cudaMemcpy(temp,images_out_gpu_serial,HISTOGRAM_SIZE * sizeof(int),cudaMemcpyDeviceToHost));
+    for (int i = 0; i < HISTOGRAM_SIZE; i++) {
+        printf("temp[i] = %d\n", temp[i]);
+    }
+
     //TODO: in a for loop:
     //   1. copy the relevant image from images_in to the GPU memory you allocated
     //   2. invoke GPU kernel on this image
     //   3. copy output from GPU memory to relevant location in images_out_gpu_serial
-    t_finish = get_time_msec(); //Do not change
-    distance_sqr = distance_sqr_between_image_arrays(images_out_cpu, images_out_gpu_serial); // Do not change
-    printf("total time %f [msec]  distance from baseline %lld (should be zero)\n", t_finish - t_start, distance_sqr); //Do not change
+//    t_finish = get_time_msec(); //Do not change
+//    distance_sqr = distance_sqr_between_image_arrays(images_out_cpu, images_out_gpu_serial); // Do not change
+//    printf("total time %f [msec]  distance from baseline %lld (should be zero)\n", t_finish - t_start, distance_sqr); //Do not change
 //
 //    // GPU bulk
 //    printf("\n=== GPU Bulk ===\n"); //Do not change

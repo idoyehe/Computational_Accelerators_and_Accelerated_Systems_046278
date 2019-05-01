@@ -68,7 +68,7 @@ long long int distance_sqr_between_image_arrays(uchar *img_arr1, uchar *img_arr2
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-__device__ int array_min_positive(int *arr, int len)
+__device__ int array_min_positive(int *arr, int len){
 	/*assuming threadblock size is the same as arr_size*/
     int tid = threadIdx.x;
     __shared__ uchar min_arr[HISTOGRAM_SIZE];
@@ -78,14 +78,13 @@ __device__ int array_min_positive(int *arr, int len)
     	bool change_flag = (min_arr[tid + half_size] > 0 && min_arr[tid] >
     	min_arr[tid + half_size] || min_arr[tid == 0]);
     		min_arr[tid] = change_flag * min_arr[tid + half_size] + (!change_flag) * min_arr[tid];
-    	}
         __syncthreads();
     	half_size /=2;
     }
     return min_arr[0];
 }
 
-__device__ int prefix_sum(int *arr, int len){
+__device__ void prefix_sum(int *arr, int len){
 /*assuming threadblock size is the same as arr_size*/
     int tid = threadIdx.x;
     int increment;
@@ -100,7 +99,7 @@ __device__ int prefix_sum(int *arr, int len){
 
 __global__ void process_image_kernel(int *in, int *out) {
     int tid = threadIdx.x;
-    prefix_sum(in);
+    prefix_sum(in,HISTOGRAM_SIZE);
     out[tid]=in[tid];
     return ;
 }
@@ -140,9 +139,9 @@ int main() {
 
     // GPU task serial computation
     printf("\n=== GPU Task Serial ===\n"); //Do not change
-    int *images_in_gpu_serial, *images_out_gpu_serial;
+    int *images_in_gpu_serial, *image_out_device_serial;
     CUDA_CHECK(cudaMalloc((void **)&images_in_gpu_serial,HISTOGRAM_SIZE));
-    CUDA_CHECK(cudaMalloc((void **)&images_out_gpu_serial,HISTOGRAM_SIZE));
+    CUDA_CHECK(cudaMalloc((void **)&image_out_device_serial,HISTOGRAM_SIZE));
 
     //TODO: allocate GPU memory for a single input image and a single output image
 //    t_start = get_time_msec(); //Do not change
@@ -153,8 +152,8 @@ int main() {
 
 
     CUDA_CHECK( cudaMemcpy(images_in_gpu_serial,temp,HISTOGRAM_SIZE * sizeof(int), cudaMemcpyHostToDevice));
-    process_image_kernel<<<1,HISTOGRAM_SIZE >>>(images_in_gpu_serial,images_out_gpu_serial);
-    CUDA_CHECK( cudaMemcpy(temp,images_out_gpu_serial,HISTOGRAM_SIZE * sizeof(int),cudaMemcpyDeviceToHost));
+    process_image_kernel<<<1,HISTOGRAM_SIZE >>>(images_in_gpu_serial,image_out_device_serial);
+    CUDA_CHECK( cudaMemcpy(temp,image_out_device_serial,HISTOGRAM_SIZE * sizeof(int),cudaMemcpyDeviceToHost));
     for (int i = 0; i < HISTOGRAM_SIZE; i++) {
         printf("temp[i] = %d\n", temp[i]);
     }

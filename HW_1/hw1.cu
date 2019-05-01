@@ -99,8 +99,12 @@ __device__ void prefix_sum(int *arr, int len){
 
 __global__ void process_image_kernel(int *in, int *out) {
     int tid = threadIdx.x;
+    int res = array_min_positive(in,HISTOGRAM_SIZE);
     prefix_sum(in,HISTOGRAM_SIZE);
     out[tid]=in[tid];
+    if(tid ==0) {
+        out[HISTOGRAM_SIZE] = in[HISTOGRAM_SIZE];
+    }
     return ;
 }
 
@@ -140,14 +144,15 @@ int main() {
     // GPU task serial computation
     printf("\n=== GPU Task Serial ===\n"); //Do not change
     int *image_in_device_serial, *image_out_device_serial;
-    CUDA_CHECK(cudaMalloc((void **)&image_in_device_serial,HISTOGRAM_SIZE));
-    CUDA_CHECK(cudaMalloc((void **)&image_out_device_serial,HISTOGRAM_SIZE));
+    CUDA_CHECK(cudaMalloc((void **)&image_in_device_serial,HISTOGRAM_SIZE * sizeof(int)));
+    CUDA_CHECK(cudaMalloc((void **)&image_out_device_serial,(1+HISTOGRAM_SIZE) * sizeof(int)));
 
     //TODO: allocate GPU memory for a single input image and a single output image
 //    t_start = get_time_msec(); //Do not change
     int* temp;
-    temp = malloc(sizeof(int)*HISTOGRAM_SIZE);
-    for (int i = 0; i < HISTOGRAM_SIZE; i++) {
+    temp =(int*)malloc(sizeof(int)*(HISTOGRAM_SIZE+1));
+    temp[0] = 0;
+    for (int i = 1; i < HISTOGRAM_SIZE; i++) {
         temp[i] = 1;
     }
 
@@ -158,6 +163,7 @@ int main() {
     for (int i = 0; i < HISTOGRAM_SIZE; i++) {
         printf("temp[i] = %d\n", temp[i]);
     }
+    printf("The minimum is: %d\n", temp[HISTOGRAM_SIZE])
     free(temp);
 
     //TODO: in a for loop:

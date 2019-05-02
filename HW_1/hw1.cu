@@ -69,7 +69,6 @@ long long int distance_sqr_between_image_arrays(uchar *img_arr1, uchar *img_arr2
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 __device__ int array_min_positive(int *arr, int len){
-	/*assuming threadblock size is the same as arr_size*/
     int tid = threadIdx.x;
     __shared__ uchar min_arr[HISTOGRAM_SIZE];
     min_arr[tid] = arr[tid]; //copy the arr to preserve it
@@ -80,12 +79,6 @@ __device__ int array_min_positive(int *arr, int len){
                     > min_arr[tid + half_size] || min_arr[tid] == 0);
             min_arr[tid] = change_flag * min_arr[tid + half_size] +
                            (!change_flag) * min_arr[tid];
-            if(tid == 0) {
-                printf("\n==============new iteration=============\n");
-                printf("\n==============half size is: %d =============\n", half_size);
-
-            }
-            printf("====min_arr[%d] is: %d =====\n",tid,min_arr[tid]);
         }
         __syncthreads();
         half_size /=2;
@@ -97,7 +90,7 @@ __device__ void prefix_sum(int *arr, int len){
 /*assuming threadblock size is the same as arr_size*/
     int tid = threadIdx.x;
     int increment;
-    for (int stride = 1; stride < blockDim.x; stride *= 2) {
+    for (int stride = 1; stride < len; stride *= 2) {
         increment = arr[tid - stride] * (tid >= stride);
         __syncthreads();
         arr[tid] += increment * (tid >= stride);

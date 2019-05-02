@@ -80,11 +80,11 @@ __device__ int array_min_positive(int *arr, int len){
                                 min_arr[tid == 0]);
             min_arr[tid] = change_flag * min_arr[tid + half_size] +
                            (!change_flag) * min_arr[tid];
+            if(tid == 0) {
+                printf("\n==============new iteration=============\n");
+            }
+            printf("====min_arr[%d] is: %d =====\n",tid,min_arr[tid]);
         }
-        if(tid == 0) {
-            printf("\n==============new iteration=============\n");
-        }
-        printf("====min_arr[%d] is: %d =====\n",tid,min_arr[tid]);
         __syncthreads();
         half_size /=2;
     }

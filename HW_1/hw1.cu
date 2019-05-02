@@ -82,9 +82,11 @@ __device__ int array_min_positive(int *arr, int len){
                            (!change_flag) * min_arr[tid];
         }
         __syncthreads();
-    	half_size /=2;
+        printf("\n==============new iteration=============\n");
+        printf("====min_arr[%d] is: %d =====\n",tid,min_arr[tid]);
+
+        half_size /=2;
     }
-    printf("\n====min_arr[0] is: %d =====\n",min_arr[0]);
     return min_arr[0];
 }
 

@@ -89,7 +89,7 @@ __device__ int array_min_positive(int *arr, int len){
 __device__ void prefix_sum(int *arr, int len){
     int tid = threadIdx.x;
     int increment;
-    for (int stride = 1; stride < len; stride *= 2) {3
+    for (int stride = 1; stride < len; stride *= 2) {
         if (tid < len && tid >= stride) { // in case # threads bigger than array length
             increment = arr[(tid < len);
         }

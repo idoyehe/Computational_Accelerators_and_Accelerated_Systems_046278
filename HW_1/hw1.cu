@@ -82,6 +82,8 @@ __device__ int array_min_positive(int *arr, int len){
                            (!change_flag) * min_arr[tid];
             if(tid == 0) {
                 printf("\n==============new iteration=============\n");
+                printf("\n==============half size is: %d =============\n", half_size);
+
             }
             printf("====min_arr[%d] is: %d =====\n",tid,min_arr[tid]);
         }

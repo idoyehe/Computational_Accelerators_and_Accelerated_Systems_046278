@@ -155,9 +155,9 @@ int main() {
     int* temp;
     temp =(int*)malloc(sizeof(int)*(HISTOGRAM_SIZE));
     for (int i = 0; i < HISTOGRAM_SIZE; i++) {
-        temp[i] = 1;
+        temp[i] = 0;
     }
-    temp[0] = 0;
+    temp[50] = 47;
 
     int *temp_out =(int*)malloc(sizeof(int)*(HISTOGRAM_SIZE+1));
 

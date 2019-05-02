@@ -71,7 +71,9 @@ long long int distance_sqr_between_image_arrays(uchar *img_arr1, uchar *img_arr2
 __device__ int array_min_positive(int *arr, int len){
     int tid = threadIdx.x;
     __shared__ uchar min_arr[HISTOGRAM_SIZE];
-    min_arr[tid] = arr[tid]; //copy the arr to preserve it
+    if (tid < len) {
+        min_arr[tid] = arr[tid]; //copy the arr to preserve it
+    }
     int half_size = len /2;
     while (half_size >=1){
         if (tid < half_size) {

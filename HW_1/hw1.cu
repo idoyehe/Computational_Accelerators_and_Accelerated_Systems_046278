@@ -71,8 +71,9 @@ long long int distance_sqr_between_image_arrays(uchar *img_arr1, uchar *img_arr2
 __device__ int array_min_positive(int *arr, int len){
     int tid = threadIdx.x;
     __shared__ uchar min_arr[HISTOGRAM_SIZE];
-    min_arr[tid * (tid < len)] = arr[(tid < len) * tid]; //copy the arr to
-        // preserve it
+    if (tid < len) {
+        min_arr[tid] = arr[tid]; //copy the arr to preserve it
+    }
     int half_size = len /2;
     while (half_size >=1){
         if (tid < half_size) {
@@ -106,8 +107,8 @@ __device__ void prefix_sum(int *arr, int len){
 __global__ void process_image_kernel(int *in, int *out) {
     int tid = threadIdx.x;
     int res = array_min_positive(in,HISTOGRAM_SIZE);
-//    prefix_sum(in,HISTOGRAM_SIZE);
-//    out[tid]=in[tid];
+    prefix_sum(in,HISTOGRAM_SIZE);
+    out[tid]=in[tid];
     if(tid ==0) {
         out[HISTOGRAM_SIZE] = res;
     }

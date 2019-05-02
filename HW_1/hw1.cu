@@ -91,7 +91,7 @@ __device__ void prefix_sum(int *arr, int len){
     int increment;
     for (int stride = 1; stride < len; stride *= 2) {
         if (tid < len && tid >= stride) { // in case # threads bigger than array length
-            increment = arr[(tid < len);
+            increment = arr[tid - stride];
         }
         __syncthreads();
         if (tid < len && tid >= stride) { // in case # threads bigger than array length

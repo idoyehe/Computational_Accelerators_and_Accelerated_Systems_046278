@@ -91,9 +91,13 @@ __device__ void prefix_sum(int *arr, int len){
     int tid = threadIdx.x;
     int increment;
     for (int stride = 1; stride < len; stride *= 2) {
-        increment = arr[tid - stride] * (tid >= stride);
+        if (tid < len) {
+            increment = arr[tid - stride] * (tid >= stride);
+        }
         __syncthreads();
-        arr[tid] += increment * (tid >= stride);
+        if (tid < len) {
+            arr[tid] += increment * (tid >= stride);
+        }
         __syncthreads();
     }
     return;

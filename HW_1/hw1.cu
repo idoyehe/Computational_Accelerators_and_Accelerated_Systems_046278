@@ -104,12 +104,12 @@ __device__ void prefix_sum(int *arr, int len){
 
 __global__ void process_image_kernel(int *in, int *out) {
     int tid = threadIdx.x;
-    int res = array_min_positive(in,HISTOGRAM_SIZE);
-    prefix_sum(in,HISTOGRAM_SIZE);
-    out[tid]=in[tid];
-    if(tid ==0) {
-        out[HISTOGRAM_SIZE] = res;
-    }
+//    int res = array_min_positive(in,HISTOGRAM_SIZE);
+//    prefix_sum(in,HISTOGRAM_SIZE);
+//    out[tid]=in[tid];
+//    if(tid ==0) {
+//        out[HISTOGRAM_SIZE] = res;
+//    }
     return ;
 }
 

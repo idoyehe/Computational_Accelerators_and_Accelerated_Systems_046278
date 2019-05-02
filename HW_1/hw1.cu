@@ -84,6 +84,7 @@ __device__ int array_min_positive(int *arr, int len){
         __syncthreads();
     	half_size /=2;
     }
+    printf("\n====min_arr[0] is: %d =====\n",min_arr[0]);
     return min_arr[0];
 }
 

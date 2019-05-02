@@ -127,36 +127,34 @@ int main() {
     CUDA_CHECK( cudaHostAlloc(&images_out_gpu_serial, N_IMAGES * IMG_HEIGHT * IMG_WIDTH, 0) );
     CUDA_CHECK( cudaHostAlloc(&images_out_gpu_bulk, N_IMAGES * IMG_HEIGHT * IMG_WIDTH, 0) );
 
-//    /* instead of loading real images, we'll load the arrays with random data */
-//    srand(0);
-//    for (long long int i = 0; i < N_IMAGES * IMG_WIDTH * IMG_HEIGHT; i++) {
-//        images_in[i] = rand() % 256;
-//    }
-//
-//    double t_start, t_finish;
-//
-//    // CPU computation. For reference. Do not change
-//    printf("\n=== CPU ===\n");
-//    t_start = get_time_msec();
-//    for (int i = 0; i < N_IMAGES; i++) {
-//        uchar *img_in = &images_in[i * IMG_WIDTH * IMG_HEIGHT];
-//        uchar *img_out = &images_out_cpu[i * IMG_WIDTH * IMG_HEIGHT];
-//        process_image(img_in, img_out);
-//    }
-//    t_finish = get_time_msec();
-//    printf("total time %f [msec]\n", t_finish - t_start);
-//
-//    long long int distance_sqr;
+    /* instead of loading real images, we'll load the arrays with random data */
+    srand(0);
+    for (long long int i = 0; i < N_IMAGES * IMG_WIDTH * IMG_HEIGHT; i++) {
+        images_in[i] = rand() % 256;
+    }
+
+    double t_start, t_finish;
+
+    // CPU computation. For reference. Do not change
+    printf("\n=== CPU ===\n");
+    t_start = get_time_msec();
+    for (int i = 0; i < N_IMAGES; i++) {
+        uchar *img_in = &images_in[i * IMG_WIDTH * IMG_HEIGHT];
+        uchar *img_out = &images_out_cpu[i * IMG_WIDTH * IMG_HEIGHT];
+        process_image(img_in, img_out);
+    }
+    t_finish = get_time_msec();
+    printf("total time %f [msec]\n", t_finish - t_start);
+
+    long long int distance_sqr;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // GPU task serial computation
     printf("\n=== GPU Task Serial ===\n"); //Do not change
     int *image_in_device_serial, *image_out_device_serial;
-    CUDA_CHECK(cudaMalloc((void **)&image_in_device_serial,1024 * sizeof(int)));
-    CUDA_CHECK(cudaMalloc((void **)&image_out_device_serial,1024 * sizeof(int)));
-
-    //TODO: allocate GPU memory for a single input image and a single output image
-//    t_start = get_time_msec(); //Do not change
+    CUDA_CHECK(cudaMalloc((void **)&image_in_device_serial,IMG_HEIGHT * IMG_WIDTH ));
+    CUDA_CHECK(cudaMalloc((void **)&image_out_device_serial,IMG_HEIGHT * IMG_WIDTH ));
+    t_start = get_time_msec(); //Do not change
     int* temp;
     temp =(int*)malloc(sizeof(int)*(HISTOGRAM_SIZE));
     for (int i = 0; i < HISTOGRAM_SIZE; i++) {

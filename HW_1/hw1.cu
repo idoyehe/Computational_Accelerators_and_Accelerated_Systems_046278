@@ -90,7 +90,7 @@ __device__ void prefix_sum(int *arr, int len){
     int tid = threadIdx.x;
     int increment;
     for (int stride = 1; stride < len; stride *= 2) {
-        increment = arr[tid - stride] * (tid >= stride) * (tid < len);
+        increment = (tid < len) * arr[(tid < len) * (tid - stride)] * (tid >= stride);
         __syncthreads();
         if (tid < len) { // in case # threads bigger than array length
             arr[tid] += increment * (tid >= stride);

@@ -109,6 +109,7 @@ __global__ void process_image_kernel(int *in, int *out) {
     int res = array_min_positive(in,HISTOGRAM_SIZE);
     prefix_sum(in,HISTOGRAM_SIZE);
     out[tid]=in[tid];
+    __syncthreads();
     if(tid ==0) {
         out[HISTOGRAM_SIZE] = res;
     }

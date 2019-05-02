@@ -87,16 +87,14 @@ __device__ int array_min_positive(int *arr, int len){
 }
 
 __device__ void prefix_sum(int *arr, int len){
-/*assuming threadblock size is the same as arr_size*/
     int tid = threadIdx.x;
     int increment;
     for (int stride = 1; stride < len; stride *= 2) {
-        if (tid < len) {
-            increment = arr[tid - stride] * (tid >= stride);
-        }
+        increment = arr[tid - stride] * (tid >= stride) * (tid < len);
         __syncthreads();
-        if (tid < len) {
+        if (tid < len) { // in case # threads bigger than array length
             arr[tid] += increment * (tid >= stride);
+
         }
         __syncthreads();
     }
@@ -166,7 +164,7 @@ int main() {
 
 
     CUDA_CHECK( cudaMemcpy(image_in_device_serial,temp,HISTOGRAM_SIZE * sizeof(int), cudaMemcpyHostToDevice));
-    process_image_kernel<<<1,512 >>>(image_in_device_serial,
+    process_image_kernel<<<1,1024 >>>(image_in_device_serial,
             image_out_device_serial);
     CUDA_CHECK( cudaMemcpy(temp_out,image_out_device_serial,(1+HISTOGRAM_SIZE) * sizeof(int),cudaMemcpyDeviceToHost));
     for (int i = 0; i < HISTOGRAM_SIZE; i++) {

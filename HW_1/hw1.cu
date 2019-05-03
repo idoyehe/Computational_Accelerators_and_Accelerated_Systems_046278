@@ -118,9 +118,18 @@ __global__ void process_image_kernel(uchar *in, uchar *out) {
     }
     prefix_sum(hist_shared, HISTOGRAM_SIZE);
     __syncthreads();
+    if(tid ==0) {
+        printf("after prefix sum\n");
+    }
+    __syncthreads();
+    if (tid < HISTOGRAM_SIZE) {
+        printf("hist_shared[%d] = %d\n", tid,hist_shared[tid]);
+    }
+    __syncthreads();
     int cdfMin = array_min_positive(hist_shared, HISTOGRAM_SIZE);
     __syncthreads();
     if(tid ==0) {
+        printf("after array_min_positive\n");
         printf("hist_shared[0] = %d\n", hist_shared[tid]);
         printf("min = %d\n", cdfMin);
     }

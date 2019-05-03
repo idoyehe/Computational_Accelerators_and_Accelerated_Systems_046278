@@ -125,6 +125,7 @@ __global__ void process_image_kernel(uchar *in, uchar *out) {
         int pixelValue = in[imageStartIndex + startOffset + tid];
         atomicAdd(hist_shared + pixelValue, 1);
     }
+    __syncthreads();
     prefix_sum(hist_shared, HISTOGRAM_SIZE);
     __syncthreads();
     if(tid ==0) {

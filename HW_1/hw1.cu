@@ -130,7 +130,6 @@ __global__ void process_image_kernel(uchar *in, uchar *out) {
     __syncthreads();
     prefix_sum(hist_shared, HISTOGRAM_SIZE);
     int * cdf = hist_shared;
-    __syncthreads();
     int cdfMin = array_min_positive(cdf, HISTOGRAM_SIZE);
     __syncthreads();
     map(cdf, cdfMin, mapOut, HISTOGRAM_SIZE);

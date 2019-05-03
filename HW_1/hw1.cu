@@ -122,13 +122,14 @@ __global__ void process_image_kernel(uchar *in, uchar *out) {
     if (tid < HISTOGRAM_SIZE) {
         hist_shared[tid] = 0;
     }
-
+    __syncthreads();
     for(int startOffset = 0; startOffset < IMG_WIDTH * IMG_HEIGHT; startOffset += blockDim.x){
         int pixelValue = in[imageStartIndex + startOffset + tid];
         atomicAdd(hist_shared + pixelValue, 1);
     }
     __syncthreads();
     prefix_sum(hist_shared, HISTOGRAM_SIZE);
+    __syncthreads();
     int * cdf = hist_shared;
     int cdfMin = array_min_positive(cdf, HISTOGRAM_SIZE);
     __syncthreads();

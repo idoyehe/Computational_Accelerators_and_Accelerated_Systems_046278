@@ -119,12 +119,14 @@ __global__ void process_image_kernel(uchar *in, uchar *out) {
     int imageStartIndex = IMG_WIDTH * IMG_HEIGHT * blockIdx.x;
     __shared__ int hist_shared[HISTOGRAM_SIZE];
     __shared__ uchar mapOut[HISTOGRAM_SIZE];
+    __shared__ uchar imageBuffer[IMG_WIDTH * IMG_HEIGHT];
     if (tid < HISTOGRAM_SIZE) {
         hist_shared[tid] = 0;
     }
 
     for(int startOffset = 0; startOffset < IMG_WIDTH * IMG_HEIGHT; startOffset += blockDim.x){
         int pixelValue = in[imageStartIndex + startOffset + tid];
+        imageBuffer[startOffset + tid] = pixelValue;
         atomicAdd(hist_shared + pixelValue, 1);
     }
     __syncthreads();
@@ -135,7 +137,7 @@ __global__ void process_image_kernel(uchar *in, uchar *out) {
     map(cdf, cdfMin, mapOut, HISTOGRAM_SIZE);
     __syncthreads();
     for(int startOffset = 0; startOffset < IMG_WIDTH * IMG_HEIGHT; startOffset += blockDim.x){
-        int pixelValue = in[imageStartIndex + startOffset + tid];
+        int pixelValue = imageBuffer[startOffset + tid];
         out[imageStartIndex + startOffset + tid] = mapOut[pixelValue];
     }
     return;

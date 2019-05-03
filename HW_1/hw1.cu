@@ -179,6 +179,7 @@ int main() {
     // GPU task serial computation
     printf("\n=== GPU Task Serial ===\n"); //Do not change
     uchar *image_in_device_serial, *image_out_device_serial;
+    /* allocating device memory for one image */
     CUDA_CHECK(cudaMalloc((void **)&image_in_device_serial,IMG_HEIGHT * IMG_WIDTH ));
     CUDA_CHECK(cudaMalloc((void **)&image_out_device_serial,IMG_HEIGHT * IMG_WIDTH ));
     t_start = get_time_msec(); //Do not change
@@ -193,6 +194,9 @@ int main() {
                               IMG_HEIGHT * IMG_WIDTH, cudaMemcpyDeviceToHost));
     }
     t_finish = get_time_msec(); //Do not change
+    /* free device memory for one image */
+    CUDA_CHECK(cudaFree(image_out_device_serial));
+    CUDA_CHECK(cudaFree(image_in_device_serial));
     distance_sqr = distance_sqr_between_image_arrays(images_out_cpu, images_out_gpu_serial); // Do not change
     printf("total time %f [msec]  distance from baseline %lld (should be zero)\n", t_finish - t_start, distance_sqr); //Do not change
 
@@ -207,6 +211,8 @@ int main() {
     cudaDeviceSynchronize();
     CUDA_CHECK(cudaMemcpy(images_out_gpu_bulk, image_out_device_bulk, IMG_HEIGHT * IMG_WIDTH * N_IMAGES, cudaMemcpyDeviceToHost));
     t_finish = get_time_msec(); //Do not change
+    CUDA_CHECK(cudaFree(image_out_device_bulk));
+    CUDA_CHECK(cudaFree(image_in_device_bulk));
     distance_sqr = distance_sqr_between_image_arrays(images_out_cpu, images_out_gpu_bulk); // Do not change
     printf("total time %f [msec]  distance from baseline %lld (should be zero)\n", t_finish - t_start, distance_sqr); //Do not change
     return 0;

@@ -156,6 +156,9 @@ int main() {
     CUDA_CHECK(cudaMalloc((void **)&image_out_device_serial,IMG_HEIGHT * IMG_WIDTH ));
     t_start = get_time_msec(); //Do not change
     process_image_kernel<<<1,1024 >>>(image_in_device_serial,image_out_device_serial);
+    int *temp_out =(int*)malloc(IMG_HEIGHT * IMG_WIDTH);
+    CUDA_CHECK( cudaMemcpy(temp_out,image_out_device_serial,(IMG_HEIGHT * IMG_WIDTH),cudaMemcpyDeviceToHost));
+
 
     //TODO: in a for loop:
     //   1. copy the relevant image from images_in to the GPU memory you allocated

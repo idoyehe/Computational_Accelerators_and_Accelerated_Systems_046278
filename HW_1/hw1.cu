@@ -74,6 +74,7 @@ __device__ int array_min_positive(int *arr, int len){
     if (tid < len) {
         min_arr[tid] = arr[tid]; //copy the arr to preserve it
     }
+    __syncthreads();
     int half_size = len /2;
     while (half_size >=1){
         if (tid < half_size) {

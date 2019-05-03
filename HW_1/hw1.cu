@@ -106,13 +106,18 @@ __device__ void prefix_sum(int *arr, int len){
 
 __global__ void process_image_kernel(int *in, int *out) {
     int tid = threadIdx.x;
-    int startIndex = IMG_WIDTH * IMG_HEIGHT * blockIdx.x;
+    int imageStartIndex = IMG_WIDTH * IMG_HEIGHT * blockIdx.x;
     __shared__ int hist_shared[HISTOGRAM_SIZE];
     if (tid < HISTOGRAM_SIZE) {
         hist_shared[tid] = 0;
     }
-    printf("\nthread per block: %d\n", blockDim.x);
-    __syncthreads();
+    for(int startOffset = 0; startOffset < IMG_WIDTH * IMG_HEIGHT; startOffset += blockDim.x){
+        int pixelValue = in[imageStartIndex + startOffset + tid]
+        atomicAdd(hist_shared + pixelValue, 1);
+    }
+    if (tid < HISTOGRAM_SIZE) {
+        printf("hist_shared[%d] = %d\n", tid,hist_shared[tid]);
+    }
     return;
 }
 
@@ -155,6 +160,7 @@ int main() {
     CUDA_CHECK(cudaMalloc((void **)&image_in_device_serial,IMG_HEIGHT * IMG_WIDTH ));
     CUDA_CHECK(cudaMalloc((void **)&image_out_device_serial,IMG_HEIGHT * IMG_WIDTH ));
     t_start = get_time_msec(); //Do not change
+    CUDA_CHECK( cudaMemcpy(image_in_device_serial,images_in,IMG_HEIGHT * IMG_WIDTH, cudaMemcpyHostToDevice));
     process_image_kernel<<<1,1024 >>>(image_in_device_serial,image_out_device_serial);
     int *temp_out =(int*)malloc(IMG_HEIGHT * IMG_WIDTH);
     CUDA_CHECK( cudaMemcpy(temp_out,image_out_device_serial,(IMG_HEIGHT * IMG_WIDTH),cudaMemcpyDeviceToHost));

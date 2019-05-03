@@ -135,7 +135,7 @@ __global__ void process_image_kernel(uchar *in, uchar *out) {
     __shared__ uchar mapOut[HISTOGRAM_SIZE];
     map(cdf, cdfMin, mapOut, HISTOGRAM_SIZE);
     __syncthreads();
-    if (tid < len) {
+    if (tid < HISTOGRAM_SIZE) {
         printf("mapOut[%d] = %u\n", tid,mapOut[tid]);
     }
 

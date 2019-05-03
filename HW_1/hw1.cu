@@ -112,9 +112,9 @@ __global__ void process_image_kernel(int *in, int *out) {
         hist_shared[tid] = 0;
     }
     if(tid==0) {
-        printf("\nthread per block: %d\n", blockDim.x)
+        printf("\nthread per block: %d\n", blockDim.x);
     }
-    for(off)
+    return;
 }
 
 int main() {

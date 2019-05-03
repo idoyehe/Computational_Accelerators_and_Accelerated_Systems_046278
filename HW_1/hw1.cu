@@ -104,7 +104,7 @@ __device__ void prefix_sum(int *arr, int len){
     return;
 }
 
-__global__ void process_image_kernel(int *in, int *out) {
+__global__ void process_image_kernel(uchar *in, uchar *out) {
     int tid = threadIdx.x;
     int imageStartIndex = IMG_WIDTH * IMG_HEIGHT * blockIdx.x;
     __shared__ int hist_shared[HISTOGRAM_SIZE];
@@ -159,7 +159,7 @@ int main() {
 
     // GPU task serial computation
     printf("\n=== GPU Task Serial ===\n"); //Do not change
-    int *image_in_device_serial, *image_out_device_serial;
+    uchar *image_in_device_serial, *image_out_device_serial;
     CUDA_CHECK(cudaMalloc((void **)&image_in_device_serial,IMG_HEIGHT * IMG_WIDTH ));
     CUDA_CHECK(cudaMalloc((void **)&image_out_device_serial,IMG_HEIGHT * IMG_WIDTH ));
     t_start = get_time_msec(); //Do not change

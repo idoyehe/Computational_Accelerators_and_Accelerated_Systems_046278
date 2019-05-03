@@ -135,12 +135,10 @@ __global__ void process_image_kernel(uchar *in, uchar *out) {
     __shared__ uchar mapOut[HISTOGRAM_SIZE];
     map(cdf, cdfMin, mapOut, HISTOGRAM_SIZE);
     __syncthreads();
-    if (tid < HISTOGRAM_SIZE) {
-        printf("mapOut[%d] = %u\n", tid,mapOut[tid]);
+    for(int startOffset = 0; startOffset < IMG_WIDTH * IMG_HEIGHT; startOffset += blockDim.x){
+        int pixelValue = in[imageStartIndex + startOffset + tid];
+        out[imageStartIndex + startOffset + tid] = mapOut[pixelValue];
     }
-
-
-
     return;
 }
 
@@ -183,19 +181,19 @@ int main() {
     CUDA_CHECK(cudaMalloc((void **)&image_in_device_serial,IMG_HEIGHT * IMG_WIDTH ));
     CUDA_CHECK(cudaMalloc((void **)&image_out_device_serial,IMG_HEIGHT * IMG_WIDTH ));
     t_start = get_time_msec(); //Do not change
-    CUDA_CHECK( cudaMemcpy(image_in_device_serial,images_in,IMG_HEIGHT * IMG_WIDTH, cudaMemcpyHostToDevice));
-    process_image_kernel<<<1,1024 >>>(image_in_device_serial,image_out_device_serial);
-    int *temp_out =(int*)malloc(IMG_HEIGHT * IMG_WIDTH);
-    CUDA_CHECK( cudaMemcpy(temp_out,image_out_device_serial,(IMG_HEIGHT * IMG_WIDTH),cudaMemcpyDeviceToHost));
+    for (int i = 0; i < N_IMAGES; i++) {
+        int imageStartIndex =  IMG_HEIGHT * IMG_WIDTH * i;
+        CUDA_CHECK(cudaMemcpy(image_in_device_serial, images_in + imageStartIndex,
+                              IMG_HEIGHT * IMG_WIDTH,
+                              cudaMemcpyHostToDevice));
+        process_image_kernel <<< 1, 1024 >>> (image_in_device_serial, image_out_device_serial);
 
-
-    //TODO: in a for loop:
-    //   1. copy the relevant image from images_in to the GPU memory you allocated
-    //   2. invoke GPU kernel on this image
-    //   3. copy output from GPU memory to relevant location in images_out_gpu_serial
-//    t_finish = get_time_msec(); //Do not change
-//    distance_sqr = distance_sqr_between_image_arrays(images_out_cpu, images_out_gpu_serial); // Do not change
-//    printf("total time %f [msec]  distance from baseline %lld (should be zero)\n", t_finish - t_start, distance_sqr); //Do not change
+        CUDA_CHECK(cudaMemcpy(images_out_gpu_serial + imageStartIndex, image_out_device_serial,
+                              IMG_HEIGHT * IMG_WIDTH, cudaMemcpyDeviceToHost));
+    }
+    t_finish = get_time_msec(); //Do not change
+    distance_sqr = distance_sqr_between_image_arrays(images_out_cpu, images_out_gpu_serial); // Do not change
+    printf("total time %f [msec]  distance from baseline %lld (should be zero)\n", t_finish - t_start, distance_sqr); //Do not change
 //
 //    // GPU bulk
 //    printf("\n=== GPU Bulk ===\n"); //Do not change

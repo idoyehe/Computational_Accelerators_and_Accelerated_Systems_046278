@@ -113,17 +113,14 @@ __global__ void process_image_kernel(int *in, int *out) {
     }
 
     for(int startOffset = 0; startOffset < IMG_WIDTH * IMG_HEIGHT; startOffset += blockDim.x){
-        if(tid == 0)
-            printf("startOffset = %d\n",  startOffset );
-//        printf("imageStartIndex + startOffset + tid = %d\n", imageStartIndex + startOffset + tid);
-//        int pixelValue = in[imageStartIndex + startOffset + tid];
-        __syncthreads();
-
-//        atomicAdd(hist_shared + pixelValue, 1);
+        int pixelValue = in[imageStartIndex + startOffset + tid];
+        if(pixelValue > 255)
+            printf("!!!!!!!!!!!!!!!!!!!\n");
+        atomicAdd(&(hist_shared[pixelValue]), 1);
     }
-//    if (tid < HISTOGRAM_SIZE) {
-//        printf("hist_shared[%d] = %d\n", tid,hist_shared[tid]);
-//    }
+    if (tid < HISTOGRAM_SIZE) {
+        printf("hist_shared[%d] = %d\n", tid,hist_shared[tid]);
+    }
     return;
 }
 

@@ -74,7 +74,7 @@ __device__ int array_min_positive(int *arr, int len){
         printf("hist_shared[%d] = %d\n", tid,hist_shared[tid]);
     }
     __syncthreads();
-    __shared__ uchar min_arr[HISTOGRAM_SIZE];
+    __shared__ int min_arr[HISTOGRAM_SIZE];
     if (tid < len) {
         min_arr[tid] = arr[tid]; //copy the arr to preserve it
     }

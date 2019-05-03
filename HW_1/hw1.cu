@@ -82,18 +82,9 @@ __device__ int array_min_positive(int *arr, int len){
                     > min_arr[tid + half_size] || min_arr[tid] == 0);
             min_arr[tid] = change_flag * min_arr[tid + half_size] +
                            (!change_flag) * min_arr[tid];
-            if(tid == 0) {
-                printf("\n==============new iteration=============\n");
-                printf("\n==============half size is: %d =============\n", half_size);
-
-            }
-            printf("====min_arr[%d] is: %d =====\n",tid,min_arr[tid]);
         }
         __syncthreads();
         half_size /=2;
-    }
-    if(tid == 0) {
-        printf("\nmin_arr[0] = %d\n", min_arr[0]);
     }
     return min_arr[0];
 }
@@ -114,6 +105,15 @@ __device__ void prefix_sum(int *arr, int len){
     return;
 }
 
+__device__ void map(int *cdf, int cdfMin, uchar* mapOut, int len){
+    int tid = threadIdx.x;
+    if (tid < len) {
+        int map_value = (float)(cdf[tid] - cdfMin) / (IMG_WIDTH * IMG_HEIGHT - cdfMin) * 255;
+        mapOut[tid] =(uchar)map_value;
+    }
+    return;
+}
+
 __global__ void process_image_kernel(uchar *in, uchar *out) {
     int tid = threadIdx.x;
     int imageStartIndex = IMG_WIDTH * IMG_HEIGHT * blockIdx.x;
@@ -128,26 +128,19 @@ __global__ void process_image_kernel(uchar *in, uchar *out) {
     }
     __syncthreads();
     prefix_sum(hist_shared, HISTOGRAM_SIZE);
+    int * cdf = hist_shared;
     __syncthreads();
-    if(tid ==0) {
-        printf("after prefix sum\n");
+    int cdfMin = array_min_positive(cdf, HISTOGRAM_SIZE);
+    __syncthreads();
+    __shared__ uchar mapOut[HISTOGRAM_SIZE];
+    map(cdf, cdfMin, mapOut, HISTOGRAM_SIZE);
+    __syncthreads();
+    if (tid < len) {
+        printf("mapOut[%d] = %u\n", tid,mapOut[tid]);
     }
-    __syncthreads();
-    if (tid < HISTOGRAM_SIZE) {
-        printf("hist_shared[%d] = %d\n", tid,hist_shared[tid]);
-    }
-    __syncthreads();
-    int cdfMin = array_min_positive(hist_shared, HISTOGRAM_SIZE);
-    __syncthreads();
-    if(tid ==0) {
-        printf("after array_min_positive\n");
-        printf("hist_shared[0] = %d\n", hist_shared[tid]);
-        printf("min = %d\n", cdfMin);
-    }
-    __syncthreads();
-    if (tid < HISTOGRAM_SIZE) {
-        printf("hist_shared[%d] = %d\n", tid,hist_shared[tid]);
-    }
+
+
+
     return;
 }
 

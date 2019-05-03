@@ -8,6 +8,7 @@
 #define IMG_WIDTH 256
 #define N_IMAGES 10000
 #define HISTOGRAM_SIZE 256
+#define THREAֹDS_PER_BLOCK 512
 
 typedef unsigned char uchar;
 
@@ -186,7 +187,7 @@ int main() {
         CUDA_CHECK(cudaMemcpy(image_in_device_serial, images_in + imageStartIndex,
                               IMG_HEIGHT * IMG_WIDTH,
                               cudaMemcpyHostToDevice));
-        process_image_kernel <<< 1, 1024 >>> (image_in_device_serial, image_out_device_serial);
+        process_image_kernel <<< 1, THREAֹDS_PER_BLOCK >>> (image_in_device_serial, image_out_device_serial);
 
         CUDA_CHECK(cudaMemcpy(images_out_gpu_serial + imageStartIndex, image_out_device_serial,
                               IMG_HEIGHT * IMG_WIDTH, cudaMemcpyDeviceToHost));
@@ -202,10 +203,16 @@ int main() {
     CUDA_CHECK(cudaMalloc((void **)&image_out_device_bulk,IMG_HEIGHT * IMG_WIDTH * N_IMAGES ));
     t_start = get_time_msec(); //Do not change
     CUDA_CHECK(cudaMemcpy(image_in_device_bulk, images_in, IMG_HEIGHT * IMG_WIDTH * N_IMAGES, cudaMemcpyHostToDevice));
-    process_image_kernel <<< N_IMAGES, 1024 >>> (image_in_device_bulk, image_out_device_bulk);
+    process_image_kernel <<< N_IMAGES, THREAֹDS_PER_BLOCK >>> (image_in_device_bulk, image_out_device_bulk);
     CUDA_CHECK(cudaMemcpy(images_out_gpu_bulk, image_out_device_bulk, IMG_HEIGHT * IMG_WIDTH * N_IMAGES, cudaMemcpyDeviceToHost));
     t_finish = get_time_msec(); //Do not change
     distance_sqr = distance_sqr_between_image_arrays(images_out_cpu, images_out_gpu_bulk); // Do not change
     printf("total time %f [msec]  distance from baseline %lld (should be zero)\n", t_finish - t_start, distance_sqr); //Do not change
+
+    /* free memory */
+    CUDA_CHECK( cudaFree(images_in) );
+    CUDA_CHECK( cudaFree(images_out_cpu) );
+    CUDA_CHECK( cudaFree(images_out_gpu_serial) );
+    CUDA_CHECK( cudaFree(images_out_gpu_bulk) );
     return 0;
 }

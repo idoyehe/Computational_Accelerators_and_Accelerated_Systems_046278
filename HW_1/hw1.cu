@@ -116,6 +116,12 @@ __global__ void process_image_kernel(uchar *in, uchar *out) {
         int pixelValue = in[imageStartIndex + startOffset + tid];
         atomicAdd(hist_shared + pixelValue, 1);
     }
+    prefix_sum(hist_shared, HISTOGRAM_SIZE);
+    __syncthreads();
+    int cdfMin = array_min_positive(hist_shared, HISTOGRAM_SIZE);
+    __syncthreads();
+    if(tid ==0)
+        printf("min = %d\n", cdfMin);
     if (tid < HISTOGRAM_SIZE) {
         printf("hist_shared[%d] = %d\n", tid,hist_shared[tid]);
     }

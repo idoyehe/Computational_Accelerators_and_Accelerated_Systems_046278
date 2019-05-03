@@ -112,7 +112,7 @@ __global__ void process_image_kernel(int *in, int *out) {
         hist_shared[tid] = 0;
     }
     for(int startOffset = 0; startOffset < IMG_WIDTH * IMG_HEIGHT; startOffset += blockDim.x){
-        int pixelValue = in[imageStartIndex + startOffset + tid]
+        int pixelValue = in[imageStartIndex + startOffset + tid];
         atomicAdd(hist_shared + pixelValue, 1);
     }
     if (tid < HISTOGRAM_SIZE) {

@@ -8,7 +8,9 @@
 #define IMG_WIDTH 256
 #define N_IMAGES 10000
 #define HISTOGRAM_SIZE 256
-#define THREADS_PER_BLOCK 1024
+#define THREADS_PER_BLOCK_SERIAL 1024
+#define THREADS_PER_BLOCK_BULK 1024
+
 
 typedef unsigned char uchar;
 
@@ -179,21 +181,24 @@ int main() {
     // GPU task serial computation
     printf("\n=== GPU Task Serial ===\n"); //Do not change
     uchar *image_in_device_serial, *image_out_device_serial;
+
     /* allocating device memory for one image */
     CUDA_CHECK(cudaMalloc((void **)&image_in_device_serial,IMG_HEIGHT * IMG_WIDTH ));
     CUDA_CHECK(cudaMalloc((void **)&image_out_device_serial,IMG_HEIGHT * IMG_WIDTH ));
+
     t_start = get_time_msec(); //Do not change
     for (int i = 0; i < N_IMAGES; i++) {
         int imageStartIndex =  IMG_HEIGHT * IMG_WIDTH * i;
         CUDA_CHECK(cudaMemcpy(image_in_device_serial, images_in + imageStartIndex,
                               IMG_HEIGHT * IMG_WIDTH,
                               cudaMemcpyHostToDevice));
-        process_image_kernel <<< 1, THREADS_PER_BLOCK >>> (image_in_device_serial, image_out_device_serial);
+        process_image_kernel <<< 1, THREADS_PER_BLOCK_SERIAL >>> (image_in_device_serial, image_out_device_serial);
         cudaDeviceSynchronize();
         CUDA_CHECK(cudaMemcpy(images_out_gpu_serial + imageStartIndex, image_out_device_serial,
                               IMG_HEIGHT * IMG_WIDTH, cudaMemcpyDeviceToHost));
     }
     t_finish = get_time_msec(); //Do not change
+
     /* free device memory for one image */
     CUDA_CHECK(cudaFree(image_out_device_serial));
     CUDA_CHECK(cudaFree(image_in_device_serial));
@@ -203,14 +208,19 @@ int main() {
     // GPU bulk
     printf("\n=== GPU Bulk ===\n"); //Do not change
     uchar *image_in_device_bulk, *image_out_device_bulk;
+
+    /* allocate device memory for all image */
     CUDA_CHECK(cudaMalloc((void **)&image_in_device_bulk,IMG_HEIGHT * IMG_WIDTH * N_IMAGES ));
     CUDA_CHECK(cudaMalloc((void **)&image_out_device_bulk,IMG_HEIGHT * IMG_WIDTH * N_IMAGES ));
+
     t_start = get_time_msec(); //Do not change
     CUDA_CHECK(cudaMemcpy(image_in_device_bulk, images_in, IMG_HEIGHT * IMG_WIDTH * N_IMAGES, cudaMemcpyHostToDevice));
-    process_image_kernel <<< N_IMAGES, THREADS_PER_BLOCK >>> (image_in_device_bulk, image_out_device_bulk);
+    process_image_kernel <<< N_IMAGES, THREADS_PER_BLOCK_BULK >>> (image_in_device_bulk, image_out_device_bulk);
     cudaDeviceSynchronize();
     CUDA_CHECK(cudaMemcpy(images_out_gpu_bulk, image_out_device_bulk, IMG_HEIGHT * IMG_WIDTH * N_IMAGES, cudaMemcpyDeviceToHost));
     t_finish = get_time_msec(); //Do not change
+
+    /* free device memory for all image */
     CUDA_CHECK(cudaFree(image_out_device_bulk));
     CUDA_CHECK(cudaFree(image_in_device_bulk));
     distance_sqr = distance_sqr_between_image_arrays(images_out_cpu, images_out_gpu_bulk); // Do not change

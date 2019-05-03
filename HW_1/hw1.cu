@@ -118,6 +118,7 @@ __global__ void process_image_kernel(uchar *in, uchar *out) {
     int tid = threadIdx.x;
     int imageStartIndex = IMG_WIDTH * IMG_HEIGHT * blockIdx.x;
     __shared__ int hist_shared[HISTOGRAM_SIZE];
+    __shared__ uchar mapOut[HISTOGRAM_SIZE];
     if (tid < HISTOGRAM_SIZE) {
         hist_shared[tid] = 0;
     }
@@ -132,7 +133,6 @@ __global__ void process_image_kernel(uchar *in, uchar *out) {
     __syncthreads();
     int cdfMin = array_min_positive(cdf, HISTOGRAM_SIZE);
     __syncthreads();
-    __shared__ uchar mapOut[HISTOGRAM_SIZE];
     map(cdf, cdfMin, mapOut, HISTOGRAM_SIZE);
     __syncthreads();
     for(int startOffset = 0; startOffset < IMG_WIDTH * IMG_HEIGHT; startOffset += blockDim.x){

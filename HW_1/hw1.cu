@@ -208,11 +208,5 @@ int main() {
     t_finish = get_time_msec(); //Do not change
     distance_sqr = distance_sqr_between_image_arrays(images_out_cpu, images_out_gpu_bulk); // Do not change
     printf("total time %f [msec]  distance from baseline %lld (should be zero)\n", t_finish - t_start, distance_sqr); //Do not change
-
-    /* free memory */
-    CUDA_CHECK( cudaFree(images_in) );
-    CUDA_CHECK( cudaFree(images_out_cpu) );
-    CUDA_CHECK( cudaFree(images_out_gpu_serial) );
-    CUDA_CHECK( cudaFree(images_out_gpu_bulk) );
     return 0;
 }

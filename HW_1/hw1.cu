@@ -9,7 +9,7 @@
 #define N_IMAGES 10000
 #define HISTOGRAM_SIZE 256
 #define THREADS_PER_BLOCK_SERIAL 1024
-#define THREADS_PER_BLOCK_BULK 1024
+#define THREADS_PER_BLOCK_BULK 256
 
 
 typedef unsigned char uchar;

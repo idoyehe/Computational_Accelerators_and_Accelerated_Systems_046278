@@ -114,9 +114,7 @@ __global__ void process_image_kernel(uchar *in, uchar *out) {
 
     for(int startOffset = 0; startOffset < IMG_WIDTH * IMG_HEIGHT; startOffset += blockDim.x){
         int pixelValue = in[imageStartIndex + startOffset + tid];
-//        if(pixelValue > 255)
-            printf("pixelValue = %d\n", pixelValue);
-//        atomicAdd(&(hist_shared[pixelValue]), 1);
+        atomicAdd(hist_shared + pixelValue, 1);
     }
     if (tid < HISTOGRAM_SIZE) {
         printf("hist_shared[%d] = %d\n", tid,hist_shared[tid]);

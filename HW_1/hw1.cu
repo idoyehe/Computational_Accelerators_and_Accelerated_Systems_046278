@@ -106,14 +106,15 @@ __device__ void prefix_sum(int *arr, int len){
 
 __global__ void process_image_kernel(int *in, int *out) {
     int tid = threadIdx.x;
-    int res = array_min_positive(in,HISTOGRAM_SIZE);
-    prefix_sum(in,HISTOGRAM_SIZE);
-    out[tid]=in[tid];
-    __syncthreads();
-    if(tid ==0) {
-        out[HISTOGRAM_SIZE] = res;
+    int startIndex = IMG_WIDTH * IMG_HEIGHT * blockIdx.x;
+    __shared__ int hist_shared[HISTOGRAM_SIZE];
+    if (tid < HISTOGRAM_SIZE) {
+        hist_shared[tid] = 0;
     }
-    return ;
+    if(tid==0) {
+        printf("\nthread per block: %d\n", blockDim.x)
+    }
+    for(off)
 }
 
 int main() {
@@ -155,26 +156,7 @@ int main() {
     CUDA_CHECK(cudaMalloc((void **)&image_in_device_serial,IMG_HEIGHT * IMG_WIDTH ));
     CUDA_CHECK(cudaMalloc((void **)&image_out_device_serial,IMG_HEIGHT * IMG_WIDTH ));
     t_start = get_time_msec(); //Do not change
-    int* temp;
-    temp =(int*)malloc(sizeof(int)*(HISTOGRAM_SIZE));
-    for (int i = 0; i < HISTOGRAM_SIZE; i++) {
-        temp[i] = 0;
-    }
-    temp[50] = 47;
-
-    int *temp_out =(int*)malloc(sizeof(int)*(HISTOGRAM_SIZE+1));
-
-
-    CUDA_CHECK( cudaMemcpy(image_in_device_serial,temp,HISTOGRAM_SIZE * sizeof(int), cudaMemcpyHostToDevice));
     process_image_kernel<<<1,1024 >>>(image_in_device_serial,image_out_device_serial);
-    CUDA_CHECK( cudaMemcpy(temp_out,image_out_device_serial,(1+HISTOGRAM_SIZE) * sizeof(int),cudaMemcpyDeviceToHost));
-    for (int i = 0; i < HISTOGRAM_SIZE; i++) {
-        printf("temp[%d] = %d\n", i,temp_out[i]);
-    }
-    printf("The minimum is: %d\n", temp_out[HISTOGRAM_SIZE]);
-    free(temp);
-    free(temp_out);
-
 
     //TODO: in a for loop:
     //   1. copy the relevant image from images_in to the GPU memory you allocated

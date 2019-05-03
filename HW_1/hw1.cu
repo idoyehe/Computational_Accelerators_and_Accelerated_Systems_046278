@@ -70,10 +70,6 @@ long long int distance_sqr_between_image_arrays(uchar *img_arr1, uchar *img_arr2
 
 __device__ int array_min_positive(int *arr, int len){
     int tid = threadIdx.x;
-    if (tid < HISTOGRAM_SIZE) {
-        printf("hist_shared[%d] = %d\n", tid,hist_shared[tid]);
-    }
-    __syncthreads();
     __shared__ int min_arr[HISTOGRAM_SIZE];
     if (tid < len) {
         min_arr[tid] = arr[tid]; //copy the arr to preserve it
@@ -82,16 +78,16 @@ __device__ int array_min_positive(int *arr, int len){
     int half_size = len /2;
     while (half_size >=1){
         if (tid < half_size) {
+            bool change_flag = (min_arr[tid + half_size] > 0 && min_arr[tid]
+                    > min_arr[tid + half_size] || min_arr[tid] == 0);
+            min_arr[tid] = change_flag * min_arr[tid + half_size] +
+                           (!change_flag) * min_arr[tid];
             if(tid == 0) {
                 printf("\n==============new iteration=============\n");
                 printf("\n==============half size is: %d =============\n", half_size);
 
             }
             printf("====min_arr[%d] is: %d =====\n",tid,min_arr[tid]);
-            bool change_flag = (min_arr[tid + half_size] > 0 && min_arr[tid]
-                    > min_arr[tid + half_size] || min_arr[tid] == 0);
-            min_arr[tid] = change_flag * min_arr[tid + half_size] +
-                           (!change_flag) * min_arr[tid];
         }
         __syncthreads();
         half_size /=2;

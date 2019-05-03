@@ -114,6 +114,7 @@ __global__ void process_image_kernel(int *in, int *out) {
     if(tid==0) {
         printf("\nthread per block: %d\n", blockDim.x);
     }
+    __syncthreads();
     return;
 }
 

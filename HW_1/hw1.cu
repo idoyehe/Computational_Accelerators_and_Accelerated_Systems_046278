@@ -193,9 +193,9 @@ int main() {
                               IMG_HEIGHT * IMG_WIDTH,
                               cudaMemcpyHostToDevice));
         process_image_kernel <<< 1, THREADS_PER_BLOCK_SERIAL >>> (image_in_device_serial, image_out_device_serial);
-        cudaDeviceSynchronize();
         CUDA_CHECK(cudaMemcpy(images_out_gpu_serial + imageStartIndex, image_out_device_serial,
                               IMG_HEIGHT * IMG_WIDTH, cudaMemcpyDeviceToHost));
+        cudaDeviceSynchronize();
     }
     t_finish = get_time_msec(); //Do not change
 
@@ -216,8 +216,8 @@ int main() {
     t_start = get_time_msec(); //Do not change
     CUDA_CHECK(cudaMemcpy(image_in_device_bulk, images_in, IMG_HEIGHT * IMG_WIDTH * N_IMAGES, cudaMemcpyHostToDevice));
     process_image_kernel <<< N_IMAGES, THREADS_PER_BLOCK_BULK >>> (image_in_device_bulk, image_out_device_bulk);
-    cudaDeviceSynchronize();
     CUDA_CHECK(cudaMemcpy(images_out_gpu_bulk, image_out_device_bulk, IMG_HEIGHT * IMG_WIDTH * N_IMAGES, cudaMemcpyDeviceToHost));
+    cudaDeviceSynchronize();
     t_finish = get_time_msec(); //Do not change
 
     /* free device memory for all image */

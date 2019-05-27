@@ -10,6 +10,8 @@
 ///////////////////////////////////////////////// DO NOT CHANGE ///////////////////////////////////////
 #define IMG_DIMENSION 32
 #define NREQUESTS 10000
+#define N_STREAMS 64
+#define INVALID_REQUEST -1
 
 typedef unsigned char uchar;
 
@@ -226,7 +228,7 @@ int main(int argc, char *argv[]) {
     }
 
     uchar *images_in; /* we concatenate all images in one huge array */
-    uchar *images_out;
+        uchar *images_out;
     CUDA_CHECK( cudaHostAlloc(&images_in, NREQUESTS * SQR(IMG_DIMENSION), 0) );
     CUDA_CHECK( cudaHostAlloc(&images_out, NREQUESTS * SQR(IMG_DIMENSION), 0) );
 
@@ -281,8 +283,24 @@ int main(int argc, char *argv[]) {
     struct rate_limit_t rate_limit;
     rate_limit_init(&rate_limit, load, 0);
 
-    /* TODO allocate / initialize memory, streams, etc... */
+
+    uchar *image_in_device_streams, *image_out_device_streams;
+
+    /* allocating device memory for all number of streams * image size */
+    CUDA_CHECK(cudaMalloc((void **)&image_in_device_streams, N_STREAMS * SQR(IMG_DIMENSION)));
+    CUDA_CHECK(cudaMalloc((void **)&image_out_device_streams,N_STREAMS * SQR(IMG_DIMENSION)));
+
+    cudaStream_t streams[N_STREAMS];
+    for (int i = 0; i < N_STREAMS; i++) {
+        CUDA_CHECK(cudaStreamCreate(&streams[i]));
+    }
+
     CUDA_CHECK(cudaMemset(images_out_from_gpu, 0, NREQUESTS * SQR(IMG_DIMENSION)));
+
+    int request_per_stream[N_STREAMS]; // this array holds for each stream what request it handel
+    for(int s_i=0; s_i < N_STREAMS; s_i++){
+        request_per_stream[s_i] = INVALID_REQUEST;
+    }
 
     double ti = get_time_msec();
     if (mode == PROGRAM_MODE_STREAMS) {
@@ -291,13 +309,51 @@ int main(int argc, char *argv[]) {
             /* TODO query (don't block) streams for any completed requests.
              * update req_t_end of completed requests
              */
+            cudaError_t cuda_q;
+            int curr_stream = N_STREAMS;
+            while (curr_stream == N_STREAMS){
+                for (int s_i = 0; s_i < N_STREAMS; s_i ++) {
+                    if (request_per_stream[s_i] != INVALID_REQUEST){
+                        cuda_q = cudaStreamQuery(streams[s_i]);
+                        if (cuda_q != cudaSuccess){
+                            continue;
+                        }
+                        // printf("stream id %d,req handled is %d\n", stream_it, req_per_stream[stream_it]);
+                        req_t_end[req_per_stream[s_i]] = get_time_msec();
+                        request_per_stream[s_i] = INVALID_REQUEST;
+                    }
+                    if (curr_stream == N_STREAMS){
+                        curr_stream = stream_it;
+                    }
+                }
+            }
 
             rate_limit_wait(&rate_limit);
             req_t_start[img_idx] = get_time_msec();
 
             /* TODO place memcpy's and kernels in a stream */
+            request_per_stream[curr_stream] = img_idx;// update the stream handel request
+
+            CUDA_CHECK( cudaMemcpyAsync(image_in_device_streams + (curr_stream * SQR(IMG_DIMENSION),
+                    images_in + (curr_stream * SQR(IMG_DIMENSION), SQR(IMG_DIMENSION), cudaMemcpyHostToDevice, streams[curr_stream]) );
+            CUDA_CHECK( cudaMemsetAsync(&gpu_hist1[curr_stream * N_HIST], 0, S_HIST_SER, streams[curr_stream]) );
+            gpu_process_image<<<1, 1024,0, streams[curr_stream]>>>(image_in_device_streams + (curr_stream * SQR(IMG_DIMENSION)) , image_out_device_streams + (curr_stream * SQR(IMG_DIMENSION)));
+            CUDA_CHECK(cudaMemcpyAsync(images_out_from_gpu + (img_idx * SQR(IMG_DIMENSION)),
+                    image_out_device_streams + (curr_stream * SQR(IMG_DIMENSION)),
+                    SQR(IMG_DIMENSION),
+                    cudaMemcpyDeviceToHost,
+                    streams[curr_stream]));
         }
-        /* TODO now make sure to wait for all streams to finish */
+
+        CUDA_CHECK(cudaDeviceSynchronize());
+        for(int s_i=0; s_i < N_STREAMS; s_i++){
+            CUDA_CHECK(cudaStreamQuery(streams[s_i]));
+            req_t_end[request_per_stream[s_i]] = get_time_msec();
+        }
+
+        for (int i = 0; i < N_STREAMS; i++) {
+            CUDA_CHECK(cudaStreamDestroy(streams[i]));
+        }
 
     } else if (mode == PROGRAM_MODE_QUEUE) {
         // TODO launch GPU consumer-producer kernel

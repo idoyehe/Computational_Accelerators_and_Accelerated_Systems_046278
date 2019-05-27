@@ -9,6 +9,8 @@
   <component name="ChangeListManager">
     <list default="true" id="35120ce7-1503-4c4c-acbe-83c986712c4b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/HW_2/ex2.cu" beforeDir="false" afterPath="$PROJECT_DIR$/HW_2/ex2.cu" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/HW_2/homework2.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/HW_2/homework2.pdf" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -22,11 +24,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HW_1/hw1.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="783">
-              <caret line="234" selection-start-line="234" selection-end-line="234" />
+            <state relative-caret-position="614">
+              <caret line="196" column="38" selection-start-line="196" selection-start-column="38" selection-end-line="196" selection-end-column="38" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="589">
+              <caret line="322" column="65" selection-start-line="322" selection-start-column="65" selection-end-line="322" selection-end-column="65" />
             </state>
           </provider>
         </entry>
@@ -40,6 +51,23 @@
       </list>
     </option>
   </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>cudaMemset</find>
+      <find>load</find>
+      <find>max</find>
+      <find>STREAMS_NUM</find>
+      <find>NREQUESTS</find>
+      <find>images_out_from_gpu</find>
+      <find>images_out</find>
+      <find>req_t_start</find>
+      <find>req_t_end</find>
+      <find>CUDA_STREAM_CHECK</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>N_STREAMS</replace>
+    </replaceStrings>
+  </component>
   <component name="Git.Settings">
     <option name="UPDATE_TYPE" value="REBASE" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -50,6 +78,7 @@
         <option value="$PROJECT_DIR$/HW_1/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/HW_1/hw1.cu" />
+        <option value="$PROJECT_DIR$/HW_2/ex2.cu" />
       </list>
     </option>
   </component>
@@ -64,6 +93,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -76,11 +106,15 @@
               <item name="Computational_Accelerators_and_Accelerated_Systems_046278" type="462c0819:PsiDirectoryNode" />
               <item name="HW_1" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="Computational_Accelerators_and_Accelerated_Systems_046278" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Computational_Accelerators_and_Accelerated_Systems_046278" type="462c0819:PsiDirectoryNode" />
+              <item name="HW_2" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -89,10 +123,11 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$/HW_2" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="CMakeSettings" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\IdoYe\CLionProjects\Computational_Accelerators_and_Accelerated_Systems_046278\HW_2" />
       <recent name="C:\Users\IdoYe\CLionProjects\Computational_Accelerators_and_Accelerated_Systems_046278\HW_1" />
     </key>
   </component>
@@ -130,6 +165,7 @@
       <workItem from="1557214835779" duration="270000" />
       <workItem from="1557245271130" duration="119000" />
       <workItem from="1557245457791" duration="23000" />
+      <workItem from="1558969967889" duration="5888000" />
     </task>
     <task id="LOCAL-00001" summary="first commit HW_1">
       <created>1556608775988</created>
@@ -404,17 +440,24 @@
       <option name="project" value="LOCAL" />
       <updated>1557245468197</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="HW_2 first commit">
+      <created>1558970041350</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1558970041350</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="16334000" />
+    <option name="totallyTimeSpent" value="22222000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2803838" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.15245202" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -463,15 +506,23 @@
     <MESSAGE value="remove cmake folder" />
     <MESSAGE value="update dry part and submission" />
     <MESSAGE value="update submission" />
-    <option name="LAST_COMMIT_MESSAGE" value="update submission" />
+    <MESSAGE value="HW_2 first commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="HW_2 first commit" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt" />
     <entry file="file://$PROJECT_DIR$/HW_1/CMakeLists.txt" />
     <entry file="file://$PROJECT_DIR$/HW_1/hw1.cu">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="783">
-          <caret line="234" selection-start-line="234" selection-end-line="234" />
+        <state relative-caret-position="614">
+          <caret line="196" column="38" selection-start-line="196" selection-start-column="38" selection-end-line="196" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="589">
+          <caret line="322" column="65" selection-start-line="322" selection-start-column="65" selection-end-line="322" selection-end-column="65" />
         </state>
       </provider>
     </entry>

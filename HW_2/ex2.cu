@@ -503,8 +503,8 @@ int main(int argc, char *argv[]) {
 
         int *producerIndexCPU, *consumerIndexCPU, *producerIndexGPU, *consumerIndexGPU;
 
-        CUDA_CHECK(cudaHostAlloc(&producerIndexCPU, numberOfThreadBlocks, 0));
-        CUDA_CHECK(cudaHostAlloc(&consumerIndexCPU, numberOfThreadBlocks, 0));
+        CUDA_CHECK(cudaHostAlloc(&producerIndexCPU, numberOfThreadBlocks * sizeof(int), 0));
+        CUDA_CHECK(cudaHostAlloc(&consumerIndexCPU, numberOfThreadBlocks * sizeof(int), 0));
 
         CUDA_CHECK(cudaHostGetDevicePointer(&cpu2gpuQueueGPU, cpu2gpuQueueCPU, 0));
         CUDA_CHECK(cudaHostGetDevicePointer(&gpu2cpuQueueGPU, gpu2cpuQueueCPU, 0));

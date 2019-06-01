@@ -26,8 +26,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="694">
-              <caret line="317" lean-forward="true" selection-start-line="317" selection-end-line="317" />
+            <state relative-caret-position="467">
+              <caret line="505" column="73" selection-start-line="505" selection-start-column="73" selection-end-line="505" selection-end-column="73" />
             </state>
           </provider>
         </entry>
@@ -43,9 +43,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>b</find>
-      <find>deq</find>
-      <find>curr_stream</find>
       <find>85</find>
       <find>25</find>
       <find>NREQUESTS</find>
@@ -70,9 +67,12 @@
       <find>dequeueJob</find>
       <find>gpu2cpuConsumerIndexCPU</find>
       <find>enqueueJob</find>
-      <find>gpu_server</find>
       <find>gpu2cpuDataQueueGPU</find>
       <find>tid</find>
+      <find>cudaHostAlloc</find>
+      <find>images_in</find>
+      <find>gpu_server</find>
+      <find>producerIndexGPU</find>
     </findStrings>
     <replaceStrings>
       <replace>N_STREAMS</replace>
@@ -121,6 +121,11 @@
             <path>
               <item name="Computational_Accelerators_and_Accelerated_Systems_046278" type="b2602c69:ProjectViewProjectNode" />
               <item name="Computational_Accelerators_and_Accelerated_Systems_046278" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Computational_Accelerators_and_Accelerated_Systems_046278" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Computational_Accelerators_and_Accelerated_Systems_046278" type="462c0819:PsiDirectoryNode" />
+              <item name="HW_1" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="Computational_Accelerators_and_Accelerated_Systems_046278" type="b2602c69:ProjectViewProjectNode" />
@@ -191,7 +196,7 @@
       <workItem from="1559060458632" duration="147000" />
       <workItem from="1559286199248" duration="1714000" />
       <workItem from="1559296758153" duration="30695000" />
-      <workItem from="1559369961791" duration="15221000" />
+      <workItem from="1559369961791" duration="17509000" />
     </task>
     <task id="LOCAL-00001" summary="first commit HW_1">
       <created>1556608775988</created>
@@ -515,11 +520,25 @@
       <option name="project" value="LOCAL" />
       <updated>1559384763793</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="producer consumer fix problem with dequeue">
+      <created>1559385365668</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1559385365668</updated>
+    </task>
+    <task id="LOCAL-00048" summary="producer consumer fix problem with dequeue">
+      <created>1559389265029</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1559389265029</updated>
+    </task>
+    <option name="localTasksCounter" value="49" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="75022000" />
+    <option name="totallyTimeSpent" value="77310000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -608,13 +627,6 @@
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt" />
     <entry file="file://$PROJECT_DIR$/HW_1/CMakeLists.txt" />
     <entry file="file://$PROJECT_DIR$/HW_2/ex2-v2.cu" />
-    <entry file="file://$PROJECT_DIR$/HW_1/hw1.cu">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="186">
-          <caret line="183" lean-forward="true" selection-start-line="183" selection-end-line="183" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/HW_2/out.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="289">
@@ -622,10 +634,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/HW_1/hw1.cu">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="746">
+          <caret line="231" column="27" selection-start-line="231" selection-start-column="4" selection-end-line="231" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="694">
-          <caret line="317" lean-forward="true" selection-start-line="317" selection-end-line="317" />
+        <state relative-caret-position="467">
+          <caret line="505" column="73" selection-start-line="505" selection-start-column="73" selection-end-line="505" selection-end-column="73" />
         </state>
       </provider>
     </entry>

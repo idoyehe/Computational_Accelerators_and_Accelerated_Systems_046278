@@ -17,7 +17,7 @@
 #define MAX_REGISTER_COUNT 32
 #define SQR(a) ((a) * (a))
 #define PIXEL_VALUES 256
-#define SHARED_MEM_PER_BLOCK 3 * PIXEL_VALUES + 1
+#define SHARED_MEM_PER_BLOCK  (PIXEL_VALUES * (1 + 2 * sizeof(int)) + 1)
 
 #define INCREASE_PC_POINTER(X) ((X) + 1) % Q_SLOTS
 

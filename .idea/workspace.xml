@@ -8,8 +8,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="35120ce7-1503-4c4c-acbe-83c986712c4b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/HW_2/dry_editable.docx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HW_2/ex2.cu" beforeDir="false" afterPath="$PROJECT_DIR$/HW_2/ex2.cu" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/HW_2/ouput_streams" beforeDir="false" afterPath="$PROJECT_DIR$/HW_2/ouput_streams" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -26,8 +28,17 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="675">
-              <caret line="566" selection-start-line="566" selection-end-line="566" />
+            <state relative-caret-position="715">
+              <caret line="69" column="64" lean-forward="true" selection-start-line="69" selection-start-column="64" selection-end-line="69" selection-end-column="64" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/HW_2/ouput_streams">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="434">
+              <caret line="44" column="29" lean-forward="true" selection-start-line="44" selection-start-column="29" selection-end-line="44" selection-end-column="29" />
             </state>
           </provider>
         </entry>
@@ -43,8 +54,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>85</find>
-      <find>25</find>
       <find>NREQUESTS</find>
       <find>is_queue_full</find>
       <find>gpu_process_image</find>
@@ -66,13 +75,15 @@
       <find>threadBlock id 5</find>
       <find>dequeueJob</find>
       <find>gpu2cpuConsumerIndexCPU</find>
-      <find>enqueueJob</find>
       <find>gpu2cpuDataQueueGPU</find>
       <find>tid</find>
       <find>cudaHostAlloc</find>
       <find>images_in</find>
       <find>gpu_server</find>
       <find>producerIndexGPU</find>
+      <find>enqueueJob</find>
+      <find>latency</find>
+      <find>SHARED_MEM_PER_BLOCK</find>
     </findStrings>
     <replaceStrings>
       <replace>N_STREAMS</replace>
@@ -99,6 +110,7 @@
         <option value="$PROJECT_DIR$/HW_1/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/HW_1/hw1.cu" />
+        <option value="$PROJECT_DIR$/HW_2/ouput_streams" />
         <option value="$PROJECT_DIR$/HW_2/ex2.cu" />
       </list>
     </option>
@@ -148,11 +160,11 @@
     <property name="settings.editor.selected.configurable" value="preferences.sourceCode" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\IdoYe\CLionProjects\Computational_Accelerators_and_Accelerated_Systems_046278\HW_1" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\IdoYe\CLionProjects\Computational_Accelerators_and_Accelerated_Systems_046278\HW_2" />
+      <recent name="C:\Users\IdoYe\CLionProjects\Computational_Accelerators_and_Accelerated_Systems_046278\HW_1" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\IdoYe\CLionProjects\Computational_Accelerators_and_Accelerated_Systems_046278\HW_1" />
     </key>
   </component>
@@ -196,14 +208,7 @@
       <workItem from="1559060458632" duration="147000" />
       <workItem from="1559286199248" duration="1714000" />
       <workItem from="1559296758153" duration="30695000" />
-      <workItem from="1559369961791" duration="18457000" />
-    </task>
-    <task id="LOCAL-00001" summary="first commit HW_1">
-      <created>1556608775988</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1556608775988</updated>
+      <workItem from="1559369961791" duration="23875000" />
     </task>
     <task id="LOCAL-00002" summary="first commit HW_1">
       <created>1556643340113</created>
@@ -541,11 +546,18 @@
       <option name="project" value="LOCAL" />
       <updated>1559390023698</updated>
     </task>
-    <option name="localTasksCounter" value="50" />
+    <task id="LOCAL-00050" summary="remove printfs">
+      <created>1559392436603</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1559392436603</updated>
+    </task>
+    <option name="localTasksCounter" value="51" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="78258000" />
+    <option name="totallyTimeSpent" value="83676000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -629,7 +641,8 @@
     <MESSAGE value="producer consumer problem with dequeue" />
     <MESSAGE value="producer consumer fix problem with dequeue" />
     <MESSAGE value="fix cuda memchk errors" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix cuda memchk errors" />
+    <MESSAGE value="remove printfs" />
+    <option name="LAST_COMMIT_MESSAGE" value="remove printfs" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt" />
@@ -649,10 +662,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/HW_2/ouput_streams">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="434">
+          <caret line="44" column="29" lean-forward="true" selection-start-line="44" selection-start-column="29" selection-end-line="44" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="675">
-          <caret line="566" selection-start-line="566" selection-end-line="566" />
+        <state relative-caret-position="715">
+          <caret line="69" column="64" lean-forward="true" selection-start-line="69" selection-start-column="64" selection-end-line="69" selection-end-column="64" />
         </state>
       </provider>
     </entry>

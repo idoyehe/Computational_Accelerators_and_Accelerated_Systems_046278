@@ -4,8 +4,9 @@ u_204397368@gpu5:~/Computational_Accelerators_and_Accelerated_Systems_046278/HW_
 mode = streams
 load = 6600.000000 (req/sec)
 distance from baseline 0.000000 (should be zero)
-throughput = 6701.470754 (req/sec)
-average latency = 0.067269 (msec)
+throughput = 6587.570901 (req/sec)
+average latency = 0.035831 (msec)
+
 
 
 === Client-Server ===
@@ -31,13 +32,13 @@ distance from baseline 0.000000 (should be zero)
 throughput = 45696.434548 (req/sec)
 average latency = 0.055533 (msec)
 
-
 === Client-Server ===
 mode = streams
 load = 62333.000000 (req/sec)
 distance from baseline 0.000000 (should be zero)
-throughput = 57905.166980 (req/sec)
-average latency = 0.069788 (msec)
+throughput = 59511.108741 (req/sec)
+average latency = 0.061123 (msec)
+
 
 === Client-Server ===
 mode = streams

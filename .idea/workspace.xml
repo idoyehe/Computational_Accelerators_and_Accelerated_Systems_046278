@@ -26,8 +26,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="467">
-              <caret line="505" column="73" selection-start-line="505" selection-start-column="73" selection-end-line="505" selection-end-column="73" />
+            <state relative-caret-position="675">
+              <caret line="566" selection-start-line="566" selection-end-line="566" />
             </state>
           </provider>
         </entry>
@@ -196,7 +196,7 @@
       <workItem from="1559060458632" duration="147000" />
       <workItem from="1559286199248" duration="1714000" />
       <workItem from="1559296758153" duration="30695000" />
-      <workItem from="1559369961791" duration="17509000" />
+      <workItem from="1559369961791" duration="18457000" />
     </task>
     <task id="LOCAL-00001" summary="first commit HW_1">
       <created>1556608775988</created>
@@ -534,11 +534,18 @@
       <option name="project" value="LOCAL" />
       <updated>1559389265029</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="fix cuda memchk errors">
+      <created>1559390023698</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1559390023698</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="77310000" />
+    <option name="totallyTimeSpent" value="78258000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -621,7 +628,8 @@
     <MESSAGE value="streams better implementation" />
     <MESSAGE value="producer consumer problem with dequeue" />
     <MESSAGE value="producer consumer fix problem with dequeue" />
-    <option name="LAST_COMMIT_MESSAGE" value="producer consumer fix problem with dequeue" />
+    <MESSAGE value="fix cuda memchk errors" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix cuda memchk errors" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt" />
@@ -643,8 +651,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="467">
-          <caret line="505" column="73" selection-start-line="505" selection-start-column="73" selection-end-line="505" selection-end-column="73" />
+        <state relative-caret-position="675">
+          <caret line="566" selection-start-line="566" selection-end-line="566" />
         </state>
       </provider>
     </entry>

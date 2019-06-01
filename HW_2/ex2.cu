@@ -437,7 +437,7 @@ int main(int argc, char *argv[]) {
             int chosen_stream = INVALID;
             /*finding stream to perform request */
             while (chosen_stream == INVALID){
-                /* freeing stresms who finished */
+                /* freeing streams who finished */
                 for (int stream_i = 0; stream_i < N_STREAMS; stream_i ++) {
                     if (request_per_stream[stream_i] != INVALID){// true when stream perform a request
                         if (cudaStreamQuery(streams[stream_i]) != cudaSuccess){//check if stream finished the job
@@ -456,7 +456,7 @@ int main(int argc, char *argv[]) {
                 continue;
             }
             req_t_start[img_idx] = get_time_msec();
-            request_per_stream[chosen_stream] = img_idx;// recored stream current job
+            request_per_stream[chosen_stream] = img_idx;// record stream current job
 
             CUDA_CHECK(cudaMemcpyAsync(image_in_device_streams + (chosen_stream * IMAGE_SIZE),
                                        images_in + (img_idx * IMAGE_SIZE), IMAGE_SIZE,
@@ -492,7 +492,6 @@ int main(int argc, char *argv[]) {
     }else if (mode == PROGRAM_MODE_QUEUE) {
         /*first calculating number of threadBlock*/
         int numberOfThreadBlocks = numOfThreadBlocksCalc(threads_queue_mode);
-        printf("Number of ThreadBlocks is %d\n", numberOfThreadBlocks);
 
         // memory alloc
         uchar *cpu2gpuQueueCPU, *cpu2gpuQueueGPU, *gpu2cpuQueueCPU, *gpu2cpuQueueGPU;
@@ -524,19 +523,14 @@ int main(int argc, char *argv[]) {
 
         gpu_server <<< numberOfThreadBlocks, threads_queue_mode >>>(producerIndexGPU, consumerIndexGPU, cpu2gpuQueueGPU, gpu2cpuQueueGPU);
         for (int img_idx = 0; img_idx < NREQUESTS; ++img_idx) {
-            printf("\ncurrent request: %d\n", img_idx);
             int chosenThreadBlock = INVALID;
             while (chosenThreadBlock == INVALID) {
                 for (int threadBlock_i = 0; threadBlock_i < numberOfThreadBlocks; threadBlock_i++) {
                     // read completed requests from tb
                     while (!is_empty(nextFetchedSlot + threadBlock_i, consumerIndexCPU + threadBlock_i)) {
-                        printf("tb %d queue is not empty\n", threadBlock_i);
                         int nextSlot = nextFetchedSlot[threadBlock_i];
                         int *currentRequestPerTbSlot = requestPerTbSlot + (threadBlock_i * Q_SLOTS);
                         int completeRequest = currentRequestPerTbSlot[nextSlot];
-                        printf("ThreadBlock id %d, request fetched is %d, from slot %d, producer index is %d, consumer is %d\n",
-                               threadBlock_i, completeRequest, nextSlot, producerIndexCPU[threadBlock_i],
-                               consumerIndexCPU[threadBlock_i]);
                         req_t_end[completeRequest] = get_time_msec(); // mark request finished time
                         dequeueJob(gpu2cpuQueueCPU + (threadBlock_i * Q_SLOTS * IMAGE_SIZE), nextSlot, completeRequest,
                                    images_out_from_gpu, IMAGE_SIZE);
@@ -556,7 +550,6 @@ int main(int argc, char *argv[]) {
             req_t_start[img_idx] = get_time_msec();
             requestPerTbSlot[chosenThreadBlock * Q_SLOTS +
                              producerIndexCPU[chosenThreadBlock]] = img_idx;//save the request in the slot
-            printf("enqueue job %d to threadBlock %d in slot %d\n", img_idx, chosenThreadBlock, producerIndexCPU[chosenThreadBlock]);
             enqueueJob(cpu2gpuQueueCPU + (chosenThreadBlock * Q_SLOTS * slotSize2GPU),
                        producerIndexCPU + chosenThreadBlock, img_idx, images_in, IMAGE_SIZE, VALID);
         }
@@ -567,18 +560,13 @@ int main(int argc, char *argv[]) {
             for (int threadBlock_i = 0; threadBlock_i < numberOfThreadBlocks; threadBlock_i++) {
                 // read completed requests from tb
                 if (!is_empty(producerIndexCPU + threadBlock_i, consumerIndexCPU + threadBlock_i)) {
-                    printf("tb %d is still working\n", threadBlock_i);
                     all_done = false;
                     continue;
                 }
                 while (!is_empty(nextFetchedSlot + threadBlock_i, consumerIndexCPU + threadBlock_i)) {
-                    printf("tb %d queue is not empty\n", threadBlock_i);
                     int nextSlot = nextFetchedSlot[threadBlock_i];
                     int *currentRequestPerTbSlot = requestPerTbSlot + (threadBlock_i * Q_SLOTS);
                     int completeRequest = currentRequestPerTbSlot[nextSlot];
-                    printf("ThreadBlock id %d, request fetched is %d, from slot %d, producer index is %d, consumer is %d\n",
-                           threadBlock_i, completeRequest, nextSlot, producerIndexCPU[threadBlock_i],
-                           consumerIndexCPU[threadBlock_i]);
                     req_t_end[completeRequest] = get_time_msec(); // mark request finished time
                     dequeueJob(gpu2cpuQueueCPU + (threadBlock_i * Q_SLOTS * IMAGE_SIZE), nextSlot, completeRequest,
                                images_out_from_gpu, IMAGE_SIZE);
@@ -588,12 +576,9 @@ int main(int argc, char *argv[]) {
             }
         }
         for (int threadBlock_i = 0; threadBlock_i < numberOfThreadBlocks; threadBlock_i++) {
-            printf("enqueue INVALID job to threadBlock %d in slot %d\n", threadBlock_i, producerIndexCPU[threadBlock_i]);
-            enqueueJob(cpu2gpuQueueCPU + (threadBlock_i * Q_SLOTS * slotSize2GPU),
-                       producerIndexCPU + threadBlock_i, 0, 0, IMAGE_SIZE, 0);
+            enqueueJob(cpu2gpuQueueCPU + (threadBlock_i * Q_SLOTS * slotSize2GPU), producerIndexCPU + threadBlock_i, 0, 0, IMAGE_SIZE, 0);
         }
         CUDA_CHECK(cudaDeviceSynchronize());
-        printf("all devices finished!\n");
 
         free(requestPerTbSlot);
         free(nextFetchedSlot);
@@ -602,7 +587,6 @@ int main(int argc, char *argv[]) {
         CUDA_CHECK(cudaFreeHost(gpu2cpuQueueCPU));
         CUDA_CHECK(cudaFreeHost(producerIndexCPU));
         CUDA_CHECK(cudaFreeHost(consumerIndexCPU));
-
     }
     else {
         assert(0);

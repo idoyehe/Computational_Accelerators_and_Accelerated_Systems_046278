@@ -8,9 +8,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="35120ce7-1503-4c4c-acbe-83c986712c4b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/HW_2/hw2_stats.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HW_2/dry_editable.docx" beforeDir="false" afterPath="$PROJECT_DIR$/HW_2/dry_editable.docx" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -27,7 +25,7 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="343">
+            <state relative-caret-position="2482">
               <caret line="507" column="43" selection-start-line="507" selection-start-column="19" selection-end-line="507" selection-end-column="43" />
             </state>
           </provider>
@@ -196,14 +194,7 @@
       <workItem from="1559060458632" duration="147000" />
       <workItem from="1559286199248" duration="1714000" />
       <workItem from="1559296758153" duration="30695000" />
-      <workItem from="1559369961791" duration="27349000" />
-    </task>
-    <task id="LOCAL-00004" summary="first commit HW_1">
-      <created>1556815024042</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1556815024042</updated>
+      <workItem from="1559369961791" duration="27381000" />
     </task>
     <task id="LOCAL-00005" summary="debug arr_min">
       <created>1556815243415</created>
@@ -541,11 +532,18 @@
       <option name="project" value="LOCAL" />
       <updated>1559399563364</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="adding xcel stats file and update dry part">
+      <created>1559403606213</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1559403606213</updated>
+    </task>
+    <option name="localTasksCounter" value="54" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="87150000" />
+    <option name="totallyTimeSpent" value="87182000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -632,7 +630,8 @@
     <MESSAGE value="remove printfs" />
     <MESSAGE value="fix shared memory size per block" />
     <MESSAGE value="adding outputs files" />
-    <option name="LAST_COMMIT_MESSAGE" value="adding outputs files" />
+    <MESSAGE value="adding xcel stats file and update dry part" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding xcel stats file and update dry part" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt" />
@@ -680,7 +679,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="343">
+        <state relative-caret-position="2482">
           <caret line="507" column="43" selection-start-line="507" selection-start-column="19" selection-end-line="507" selection-end-column="43" />
         </state>
       </provider>

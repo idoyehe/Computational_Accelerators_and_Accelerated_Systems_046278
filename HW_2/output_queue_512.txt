@@ -1,0 +1,89 @@
+max load is 83000
+
+=== Client-Server ===
+mode = queue
+load = 8300.000000 (req/sec)
+threads = 512
+distance from baseline 0.000000 (should be zero)
+throughput = 8453.445842 (req/sec)
+average latency = 0.255284 (msec)
+
+=== Client-Server ===
+mode = queue
+load = 25822.000000 (req/sec)
+threads = 512
+distance from baseline 0.000000 (should be zero)
+throughput = 25463.790047 (req/sec)
+average latency = 0.954448 (msec)
+
+
+=== Client-Server ===
+mode = queue
+load = 43344.000000 (req/sec)
+threads = 512
+distance from baseline 0.000000 (should be zero)
+throughput = 41868.213464 (req/sec)
+average latency = 2.983908 (msec)
+
+
+=== Client-Server ===
+mode = queue
+load = 60866.000000 (req/sec)
+threads = 512
+distance from baseline 0.000000 (should be zero)
+throughput = 57351.343526 (req/sec)
+average latency = 4.438241 (msec)
+
+
+=== Client-Server ===
+mode = queue
+load = 78388.000000 (req/sec)
+threads = 512
+distance from baseline 0.000000 (should be zero)
+throughput = 73103.116502 (req/sec)
+average latency = 4.657392 (msec)
+
+
+=== Client-Server ===
+mode = queue
+load = 95911.000000 (req/sec)
+threads = 512
+distance from baseline 0.000000 (should be zero)
+throughput = 82279.948419 (req/sec)
+average latency = 4.868808 (msec)
+
+
+=== Client-Server ===
+mode = queue
+load = 113433.000000 (req/sec)
+threads = 512
+distance from baseline 0.000000 (should be zero)
+throughput = 81881.374381 (req/sec)
+average latency = 4.974646 (msec)
+
+
+=== Client-Server ===
+mode = queue
+load = 130955.000000 (req/sec)
+threads = 512
+distance from baseline 0.000000 (should be zero)
+throughput = 83603.617487 (req/sec)
+average latency = 4.914363 (msec)
+
+
+=== Client-Server ===
+mode = queue
+load = 148477.000000 (req/sec)
+threads = 512
+distance from baseline 0.000000 (should be zero)
+throughput = 83132.478760 (req/sec)
+average latency = 4.971361 (msec)
+
+
+=== Client-Server ===
+mode = queue
+load = 166000.000000 (req/sec)
+threads = 512
+distance from baseline 0.000000 (should be zero)
+throughput = 83062.040106 (req/sec)
+average latency = 4.983748 (msec)

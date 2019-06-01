@@ -8,10 +8,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="35120ce7-1503-4c4c-acbe-83c986712c4b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/HW_2/dry_editable.docx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/HW_2/output_queue_1024.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/HW_2/output_queue_512.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HW_2/ex2.cu" beforeDir="false" afterPath="$PROJECT_DIR$/HW_2/ex2.cu" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HW_2/ouput_streams" beforeDir="false" afterPath="$PROJECT_DIR$/HW_2/ouput_streams" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/HW_2/dry_editable.docx" beforeDir="false" afterPath="$PROJECT_DIR$/HW_2/dry_editable.docx" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -25,20 +25,29 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="715">
-              <caret line="69" column="64" lean-forward="true" selection-start-line="69" selection-start-column="64" selection-end-line="69" selection-end-column="64" />
+            <state relative-caret-position="529">
+              <caret line="69" column="64" selection-start-line="69" selection-start-column="64" selection-end-line="69" selection-end-column="64" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/HW_2/ouput_streams">
+        <entry file="file://$PROJECT_DIR$/HW_2/output_queue_1024.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="434">
-              <caret line="44" column="29" lean-forward="true" selection-start-line="44" selection-start-column="29" selection-end-line="44" selection-end-column="29" />
+            <state>
+              <caret column="17" selection-start-column="17" selection-end-column="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/HW_2/output_queue_512.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="31">
+              <caret line="1" selection-start-line="1" selection-end-line="1" />
             </state>
           </provider>
         </entry>
@@ -112,6 +121,9 @@
         <option value="$PROJECT_DIR$/HW_1/hw1.cu" />
         <option value="$PROJECT_DIR$/HW_2/ouput_streams" />
         <option value="$PROJECT_DIR$/HW_2/ex2.cu" />
+        <option value="$PROJECT_DIR$/HW_2/out.txt" />
+        <option value="$PROJECT_DIR$/HW_2/output_queue_1024.txt" />
+        <option value="$PROJECT_DIR$/HW_2/output_queue_512.txt" />
       </list>
     </option>
   </component>
@@ -208,14 +220,7 @@
       <workItem from="1559060458632" duration="147000" />
       <workItem from="1559286199248" duration="1714000" />
       <workItem from="1559296758153" duration="30695000" />
-      <workItem from="1559369961791" duration="23875000" />
-    </task>
-    <task id="LOCAL-00002" summary="first commit HW_1">
-      <created>1556643340113</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1556643340113</updated>
+      <workItem from="1559369961791" duration="25381000" />
     </task>
     <task id="LOCAL-00003" summary="first commit HW_1">
       <created>1556646289888</created>
@@ -553,11 +558,18 @@
       <option name="project" value="LOCAL" />
       <updated>1559392436603</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="fix shared memory size per block">
+      <created>1559397847236</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1559397847237</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="83676000" />
+    <option name="totallyTimeSpent" value="85182000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -642,19 +654,13 @@
     <MESSAGE value="producer consumer fix problem with dequeue" />
     <MESSAGE value="fix cuda memchk errors" />
     <MESSAGE value="remove printfs" />
-    <option name="LAST_COMMIT_MESSAGE" value="remove printfs" />
+    <MESSAGE value="fix shared memory size per block" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix shared memory size per block" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt" />
     <entry file="file://$PROJECT_DIR$/HW_1/CMakeLists.txt" />
     <entry file="file://$PROJECT_DIR$/HW_2/ex2-v2.cu" />
-    <entry file="file://$PROJECT_DIR$/HW_2/out.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="44936" column="16" selection-start-line="44936" selection-end-line="44936" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/HW_1/hw1.cu">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="746">
@@ -669,10 +675,29 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/HW_2/ouput_queues">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2047" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="715">
-          <caret line="69" column="64" lean-forward="true" selection-start-line="69" selection-start-column="64" selection-end-line="69" selection-end-column="64" />
+        <state relative-caret-position="529">
+          <caret line="69" column="64" selection-start-line="69" selection-start-column="64" selection-end-line="69" selection-end-column="64" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HW_2/output_queue_1024.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="17" selection-start-column="17" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HW_2/output_queue_512.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="31">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
         </state>
       </provider>
     </entry>

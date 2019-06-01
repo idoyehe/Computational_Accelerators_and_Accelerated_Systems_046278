@@ -213,12 +213,12 @@ __device__ void prefix_sum(int arr[], int arr_size) {
 }
 
 __global__ void gpu_process_image(uchar *in, uchar *out) {
-    __shared__ int histogram[256];
-    __shared__ int hist_min[256];
+    __shared__ int histogram[PIXEL_VALUES];
+    __shared__ int hist_min[PIXEL_VALUES];
 
     int tid = threadIdx.x;
 
-    if (tid < 256) {
+    if (tid < PIXEL_VALUES) {
         histogram[tid] = 0;
     }
     __syncthreads();
@@ -228,17 +228,17 @@ __global__ void gpu_process_image(uchar *in, uchar *out) {
 
     __syncthreads();
 
-    prefix_sum(histogram, 256);
+    prefix_sum(histogram, PIXEL_VALUES);
 
-    if (tid < 256) {
+    if (tid < PIXEL_VALUES) {
         hist_min[tid] = histogram[tid];
     }
     __syncthreads();
 
-    int cdf_min = arr_min(hist_min, 256);
+    int cdf_min = arr_min(hist_min, PIXEL_VALUES);
 
-    __shared__ uchar map[256];
-    if (tid < 256) {
+    __shared__ uchar map[PIXEL_VALUES];
+    if (tid < PIXEL_VALUES) {
         int map_value = (float)(histogram[tid] - cdf_min) / (SQR(IMG_DIMENSION) - cdf_min) * 255;
         map[tid] = (uchar)map_value;
     }
@@ -331,7 +331,6 @@ void print_usage_and_die(char *progname) {
     printf("%s queue <#threads> <load (requests/sec)>\n", progname);
     exit(1);
 }
-
 
 enum {PROGRAM_MODE_STREAMS = 0, PROGRAM_MODE_QUEUE};
 int main(int argc, char *argv[]) {
@@ -596,6 +595,14 @@ int main(int argc, char *argv[]) {
         CUDA_CHECK(cudaDeviceSynchronize());
         printf("all devices finished!\n");
 
+        free(requestPerTbSlot);
+        free(nextFetchedSlot);
+
+        CUDA_CHECK(cudaFreeHost(cpu2gpuQueueCPU));
+        CUDA_CHECK(cudaFreeHost(gpu2cpuQueueCPU));
+        CUDA_CHECK(cudaFreeHost(producerIndexCPU));
+        CUDA_CHECK(cudaFreeHost(consumerIndexCPU));
+
     }
     else {
         assert(0);
@@ -608,6 +615,12 @@ int main(int argc, char *argv[]) {
         avg_latency += (req_t_end[i] - req_t_start[i]);
     }
     avg_latency /= NREQUESTS;
+
+    free(req_t_end);
+    free(req_t_start);
+    CUDA_CHECK(cudaFreeHost(images_out_from_gpu));
+    CUDA_CHECK(cudaFreeHost(images_out));
+    CUDA_CHECK(cudaFreeHost(images_in));
 
     printf("mode = %s\n", mode == PROGRAM_MODE_STREAMS ? "streams" : "queue");
     printf("load = %lf (req/sec)\n", load);

@@ -26,8 +26,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="394">
-              <caret line="313" selection-start-line="313" selection-end-line="313" />
+            <state relative-caret-position="694">
+              <caret line="317" lean-forward="true" selection-start-line="317" selection-end-line="317" />
             </state>
           </provider>
         </entry>
@@ -43,8 +43,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>current request:</find>
-      <find>enq</find>
       <find>b</find>
       <find>deq</find>
       <find>curr_stream</find>
@@ -73,6 +71,8 @@
       <find>gpu2cpuConsumerIndexCPU</find>
       <find>enqueueJob</find>
       <find>gpu_server</find>
+      <find>gpu2cpuDataQueueGPU</find>
+      <find>tid</find>
     </findStrings>
     <replaceStrings>
       <replace>N_STREAMS</replace>
@@ -191,7 +191,7 @@
       <workItem from="1559060458632" duration="147000" />
       <workItem from="1559286199248" duration="1714000" />
       <workItem from="1559296758153" duration="30695000" />
-      <workItem from="1559369961791" duration="14594000" />
+      <workItem from="1559369961791" duration="15221000" />
     </task>
     <task id="LOCAL-00001" summary="first commit HW_1">
       <created>1556608775988</created>
@@ -508,11 +508,18 @@
       <option name="project" value="LOCAL" />
       <updated>1559382219374</updated>
     </task>
-    <option name="localTasksCounter" value="46" />
+    <task id="LOCAL-00046" summary="producer consumer fix problem with dequeue">
+      <created>1559384763793</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1559384763793</updated>
+    </task>
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="74395000" />
+    <option name="totallyTimeSpent" value="75022000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -594,7 +601,8 @@
     <MESSAGE value="HW_2 first implement" />
     <MESSAGE value="streams better implementation" />
     <MESSAGE value="producer consumer problem with dequeue" />
-    <option name="LAST_COMMIT_MESSAGE" value="producer consumer problem with dequeue" />
+    <MESSAGE value="producer consumer fix problem with dequeue" />
+    <option name="LAST_COMMIT_MESSAGE" value="producer consumer fix problem with dequeue" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt" />
@@ -616,8 +624,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="394">
-          <caret line="313" selection-start-line="313" selection-end-line="313" />
+        <state relative-caret-position="694">
+          <caret line="317" lean-forward="true" selection-start-line="317" selection-end-line="317" />
         </state>
       </provider>
     </entry>

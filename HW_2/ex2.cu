@@ -260,6 +260,7 @@ __global__ void gpu_server(int* producerIndexGPU, int* consumerIndexGPU, uchar* 
     int tid = threadIdx.x;
     int threadBlockIndex = blockIdx.x;
     uchar * threadBlockInputQueue = cpu2gpuQueueGPU + (threadBlockIndex * Q_SLOTS  * slotSize2GPU);
+
     while (1) {
         if (tid == 0) {
             /* busy wait while there are no outstanding jobs or gpu_cpu_queue is full */
@@ -285,10 +286,8 @@ __global__ void gpu_server(int* producerIndexGPU, int* consumerIndexGPU, uchar* 
         uchar *image_in = threadBlockInputQueue + (consumerIndexGPU[threadBlockIndex] * slotSize2GPU) + 1;
         __syncthreads();
 
-
-        for (int i = tid; i < SQR(IMG_DIMENSION); i += blockDim.x) {
-            atomicAdd(&histogram[image_in[tid]], 1);
-        }
+        for (int i = tid; i < SQR(IMG_DIMENSION); i += blockDim.x)
+            atomicAdd(&histogram[image_in[i]], 1);
 
         __syncthreads();
 
@@ -313,8 +312,9 @@ __global__ void gpu_server(int* producerIndexGPU, int* consumerIndexGPU, uchar* 
         __syncthreads();
 
         for (int i = tid; i < SQR(IMG_DIMENSION); i += blockDim.x) {
-            outputSlot[i] =  map[image_in[i]];
+            outputSlot[i] = map[image_in[i]];
         }
+        __threadfence_system();
 
         if (tid == 0) {
                 consumerIndexGPU[threadBlockIndex] = INCREASE_PC_POINTER(consumerIndexGPU[threadBlockIndex]);

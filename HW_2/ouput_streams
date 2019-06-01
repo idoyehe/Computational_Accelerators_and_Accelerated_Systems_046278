@@ -1,0 +1,80 @@
+u_204397368@gpu5:~/Computational_Accelerators_and_Accelerated_Systems_046278/HW_2$ for l in ${loads[@]}; do ./ex2 streams $l; done
+
+=== Client-Server ===
+mode = streams
+load = 6600.000000 (req/sec)
+distance from baseline 0.000000 (should be zero)
+throughput = 6701.470754 (req/sec)
+average latency = 0.067269 (msec)
+
+
+=== Client-Server ===
+mode = streams
+load = 20533.000000 (req/sec)
+distance from baseline 0.000000 (should be zero)
+throughput = 20087.815418 (req/sec)
+average latency = 0.044421 (msec)
+
+
+=== Client-Server ===
+mode = streams
+load = 34666.000000 (req/sec)
+distance from baseline 0.000000 (should be zero)
+throughput = 34519.607630 (req/sec)
+average latency = 0.046088 (msec)
+
+
+=== Client-Server ===
+mode = streams
+load = 48400.000000 (req/sec)
+distance from baseline 0.000000 (should be zero)
+throughput = 45696.434548 (req/sec)
+average latency = 0.055533 (msec)
+
+
+=== Client-Server ===
+mode = streams
+load = 62333.000000 (req/sec)
+distance from baseline 0.000000 (should be zero)
+throughput = 57905.166980 (req/sec)
+average latency = 0.069788 (msec)
+
+=== Client-Server ===
+mode = streams
+load = 76266.000000 (req/sec)
+distance from baseline 0.000000 (should be zero)
+throughput = 58146.548382 (req/sec)
+average latency = 0.063793 (msec)
+
+
+=== Client-Server ===
+mode = streams
+load = 90200.000000 (req/sec)
+distance from baseline 0.000000 (should be zero)
+throughput = 63465.940925 (req/sec)
+average latency = 0.066275 (msec)
+
+
+=== Client-Server ===
+mode = streams
+load = 104133.000000 (req/sec)
+distance from baseline 0.000000 (should be zero)
+throughput = 61135.120349 (req/sec)
+average latency = 0.067265 (msec)
+
+
+=== Client-Server ===
+mode = streams
+load = 118066.000000 (req/sec)
+distance from baseline 0.000000 (should be zero)
+throughput = 59337.428294 (req/sec)
+average latency = 0.062947 (msec)
+
+
+=== Client-Server ===
+mode = streams
+load = 132000.000000 (req/sec)
+distance from baseline 0.000000 (should be zero)
+throughput = 65585.745148 (req/sec)
+average latency = 0.073375 (msec)
+

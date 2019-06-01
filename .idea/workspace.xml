@@ -8,8 +8,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="35120ce7-1503-4c4c-acbe-83c986712c4b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/HW_2/ouput_streams" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HW_2/ex2.cu" beforeDir="false" afterPath="$PROJECT_DIR$/HW_2/ex2.cu" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/HW_2/homework2.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/HW_2/homework2.pdf" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -23,29 +25,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/HW_1/hw1.cu">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6262">
-              <caret line="202" selection-start-line="202" selection-end-line="203" selection-end-column="49" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="141">
-              <caret line="360" column="34" selection-start-line="360" selection-start-column="34" selection-end-line="360" selection-end-column="34" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/HW_2/out.txt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-126736">
-              <caret line="5905" column="29" selection-start-line="5905" selection-start-column="29" selection-end-line="5905" selection-end-column="29" />
+            <state relative-caret-position="299">
+              <caret line="560" column="55" selection-start-line="560" selection-start-column="45" selection-end-line="560" selection-end-column="55" />
             </state>
           </provider>
         </entry>
@@ -61,28 +45,49 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>cudaMemset</find>
-      <find>load</find>
-      <find>max</find>
-      <find>STREAMS_NUM</find>
-      <find>NREQUESTS</find>
-      <find>images_out_from_gpu</find>
-      <find>images_out</find>
-      <find>req_t_start</find>
-      <find>req_t_end</find>
-      <find>CUDA_STREAM_CHECK</find>
-      <find>INVALID_REQUEST</find>
+      <find>image_in_device_streams</find>
+      <find>total_distance</find>
+      <find>VALID</find>
+      <find>cpu_gpu_queue</find>
       <find>CUDA_CHECK</find>
-      <find>10</find>
-      <find>64</find>
-      <find>63</find>
+      <find>last_slot_by_tb</find>
+      <find>is_empty</find>
+      <find>ti</find>
+      <find>req_by_tb</find>
+      <find>cpu2gpu_producer_idx</find>
+      <find>memcpy</find>
+      <find>current request:</find>
+      <find>enq</find>
+      <find>dequeueJob</find>
+      <find>b</find>
+      <find>deq</find>
       <find>curr_stream</find>
+      <find>85</find>
+      <find>25</find>
+      <find>NREQUESTS</find>
+      <find>is_queue_full</find>
+      <find>enqu</find>
+      <find>gpu_ser</find>
+      <find>gpu_process_image</find>
+      <find>malloc</find>
+      <find>gpu_server</find>
+      <find>enqueueJob</find>
+      <find>images_out_from_gpu</find>
+      <find>INCREASE_POINTER</find>
+      <find>image_size</find>
     </findStrings>
     <replaceStrings>
       <replace>N_STREAMS</replace>
       <replace>INVALID_REQUEST</replace>
       <replace>INVALID</replace>
+      <replace>minBlocksPerSM</replace>
+      <replace>cpu2gpu_producer_idx</replace>
+      <replace>cpu2gpu_consumer_idx</replace>
+      <replace>numberOfThreadBlocks</replace>
+      <replace>last_request_by_tb</replace>
+      <replace>last_slot_by_tb</replace>
       <replace>chosen_stream</replace>
+      <replace>INCREASE_PC_POINTER</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -110,6 +115,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -131,7 +137,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -140,9 +145,13 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$/HW_2" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="nodejs_package_manager_path" value="npm" />
     <property name="settings.editor.selected.configurable" value="preferences.sourceCode" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\IdoYe\CLionProjects\Computational_Accelerators_and_Accelerated_Systems_046278\HW_1" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\IdoYe\CLionProjects\Computational_Accelerators_and_Accelerated_Systems_046278\HW_2" />
       <recent name="C:\Users\IdoYe\CLionProjects\Computational_Accelerators_and_Accelerated_Systems_046278\HW_1" />
@@ -184,7 +193,11 @@
       <workItem from="1557245457791" duration="23000" />
       <workItem from="1558969967889" duration="6166000" />
       <workItem from="1558977919827" duration="3175000" />
-      <workItem from="1559025220071" duration="1462000" />
+      <workItem from="1559025220071" duration="1570000" />
+      <workItem from="1559060458632" duration="147000" />
+      <workItem from="1559286199248" duration="1714000" />
+      <workItem from="1559296758153" duration="30695000" />
+      <workItem from="1559369961791" duration="1957000" />
     </task>
     <task id="LOCAL-00001" summary="first commit HW_1">
       <created>1556608775988</created>
@@ -480,21 +493,28 @@
       <option name="project" value="LOCAL" />
       <updated>1558981106380</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary="HW_2 first implement">
+      <created>1559026783480</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1559026783480</updated>
+    </task>
+    <option name="localTasksCounter" value="44" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="27137000" />
+    <option name="totallyTimeSpent" value="61758000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.15565032" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.16204691" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Find" order="1" visible="true" weight="0.12676056" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
@@ -504,7 +524,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.12784399" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.32936078" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="CMake" order="11" visible="true" weight="0.07475623" />
+      <window_info anchor="bottom" id="CMake" order="11" visible="true" weight="0.043336947" />
       <window_info anchor="bottom" id="Messages" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -546,24 +566,25 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt" />
     <entry file="file://$PROJECT_DIR$/HW_1/CMakeLists.txt" />
-    <entry file="file://$PROJECT_DIR$/HW_1/hw1.cu">
+    <entry file="file://$PROJECT_DIR$/HW_2/ex2-v2.cu" />
+    <entry file="file://$PROJECT_DIR$/HW_2/out.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6262">
-          <caret line="202" selection-start-line="202" selection-end-line="203" selection-end-column="49" />
+        <state relative-caret-position="-2112">
+          <caret line="711" column="33" selection-start-line="711" selection-start-column="31" selection-end-line="711" selection-end-column="33" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HW_2/out.txt">
+    <entry file="file://$PROJECT_DIR$/HW_1/hw1.cu">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-126736">
-          <caret line="5905" column="29" selection-start-line="5905" selection-start-column="29" selection-end-line="5905" selection-end-column="29" />
+        <state relative-caret-position="186">
+          <caret line="183" lean-forward="true" selection-start-line="183" selection-end-line="183" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="141">
-          <caret line="360" column="34" selection-start-line="360" selection-start-column="34" selection-end-line="360" selection-end-column="34" />
+        <state relative-caret-position="299">
+          <caret line="560" column="55" selection-start-line="560" selection-start-column="45" selection-end-line="560" selection-end-column="55" />
         </state>
       </provider>
     </entry>

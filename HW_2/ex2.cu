@@ -281,49 +281,42 @@ __global__ void gpu_server(int* producerIndexGPU, int* consumerIndexGPU, uchar* 
         if (tid < PIXEL_VALUES) {
             histogram[tid] = 0;
         }
-        __threadfence_block();
+        __syncthreads();
         uchar *image_in = threadBlockInputQueue + (consumerIndexGPU[threadBlockIndex] * slotSize2GPU) + 1;
-        __threadfence_block();
+        __syncthreads();
 
-        if (tid == 0) {
-            for (int i = 0; i < SQR(IMG_DIMENSION); i++) {
-                atomicAdd(&histogram[image_in[i]], 1);
-            }
+
+        for (int i = tid; i < SQR(IMG_DIMENSION); i += blockDim.x) {
+            atomicAdd(&histogram[image_in[tid]], 1);
         }
 
-////        for (int i = tid; i < SQR(IMG_DIMENSION); i +=) {
-//            atomicAdd(&histogram[image_in[tid]], 1);
-////        }
-        __threadfence_block();
+        __syncthreads();
 
         prefix_sum(histogram, PIXEL_VALUES);
-        __threadfence_block();
+        __syncthreads();
 
         if (tid < PIXEL_VALUES) {
             hist_min[tid] = histogram[tid];
         }
-        __threadfence_block();
+        __syncthreads();
 
         int cdf_min = arr_min(hist_min, PIXEL_VALUES);
-        __threadfence_block();
+        __syncthreads();
 
         if (tid < PIXEL_VALUES) {
             int map_value = (float)(histogram[tid] - cdf_min) / (SQR(IMG_DIMENSION) - cdf_min) * 255;
             map[tid] = (uchar)map_value;
         }
-        __threadfence_block();
-
         uchar * threadBlockOutputQueue = gpu2cpuQueueGPU + (threadBlockIndex * Q_SLOTS  * (SQR(IMG_DIMENSION)));
         uchar *outputSlot = threadBlockOutputQueue + (SQR(IMG_DIMENSION) * consumerIndexGPU[threadBlockIndex]);
-        __threadfence_block();
 
+        __syncthreads();
 
-        __threadfence_system();
+        for (int i = tid; i < SQR(IMG_DIMENSION); i += blockDim.x) {
+            outputSlot[i] =  map[image_in[i]];
+        }
 
         if (tid == 0) {
-            for (int i = 0; i < SQR(IMG_DIMENSION); i ++) {
-                outputSlot[i] =  map[image_in[i]];
-            }
                 consumerIndexGPU[threadBlockIndex] = INCREASE_PC_POINTER(consumerIndexGPU[threadBlockIndex]);
                 __threadfence_system();
         }

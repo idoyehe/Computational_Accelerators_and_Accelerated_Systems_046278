@@ -26,17 +26,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-339">
-              <caret line="290" column="13" lean-forward="true" selection-start-line="290" selection-start-column="13" selection-end-line="290" selection-end-column="13" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/HW_2/out.txt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="44936" column="16" selection-start-line="44936" selection-end-line="44936" selection-end-column="16" />
+            <state relative-caret-position="394">
+              <caret line="313" selection-start-line="313" selection-end-line="313" />
             </state>
           </provider>
         </entry>
@@ -52,7 +43,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>memcpy</find>
       <find>current request:</find>
       <find>enq</find>
       <find>b</find>
@@ -68,7 +58,6 @@
       <find>INCREASE_POINTER</find>
       <find>image_size</find>
       <find>lastFetchedSlot</find>
-      <find>gpu_server</find>
       <find>cpu2</find>
       <find>enqu</find>
       <find>9999</find>
@@ -77,11 +66,13 @@
       <find>gpu_ser</find>
       <find>dequeue</find>
       <find>9884</find>
-      <find>enqueueJob</find>
-      <find>dequeueJob</find>
       <find>9047</find>
       <find>threadBlock 5</find>
       <find>threadBlock id 5</find>
+      <find>dequeueJob</find>
+      <find>gpu2cpuConsumerIndexCPU</find>
+      <find>enqueueJob</find>
+      <find>gpu_server</find>
     </findStrings>
     <replaceStrings>
       <replace>N_STREAMS</replace>
@@ -200,7 +191,7 @@
       <workItem from="1559060458632" duration="147000" />
       <workItem from="1559286199248" duration="1714000" />
       <workItem from="1559296758153" duration="30695000" />
-      <workItem from="1559369961791" duration="12071000" />
+      <workItem from="1559369961791" duration="14594000" />
     </task>
     <task id="LOCAL-00001" summary="first commit HW_1">
       <created>1556608775988</created>
@@ -510,11 +501,18 @@
       <option name="project" value="LOCAL" />
       <updated>1559371993577</updated>
     </task>
-    <option name="localTasksCounter" value="45" />
+    <task id="LOCAL-00045" summary="producer consumer problem with dequeue">
+      <created>1559382219374</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1559382219374</updated>
+    </task>
+    <option name="localTasksCounter" value="46" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="71872000" />
+    <option name="totallyTimeSpent" value="74395000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -595,7 +593,8 @@
     <MESSAGE value="HW_2 first commit" />
     <MESSAGE value="HW_2 first implement" />
     <MESSAGE value="streams better implementation" />
-    <option name="LAST_COMMIT_MESSAGE" value="streams better implementation" />
+    <MESSAGE value="producer consumer problem with dequeue" />
+    <option name="LAST_COMMIT_MESSAGE" value="producer consumer problem with dequeue" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt" />
@@ -617,8 +616,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-339">
-          <caret line="290" column="13" lean-forward="true" selection-start-line="290" selection-start-column="13" selection-end-line="290" selection-end-column="13" />
+        <state relative-caret-position="394">
+          <caret line="313" selection-start-line="313" selection-end-line="313" />
         </state>
       </provider>
     </entry>

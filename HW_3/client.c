@@ -9,6 +9,36 @@
 #include "common.h"
 
 #define NREQUESTS 10000
+#define INVALID -1
+#define VALID 1
+
+bool is_queue_full(int *p_id, int *c_id) {
+    __sync_synchronize();
+    return INCREASE_PC_POINTER(*p_id) == *c_id;
+}
+
+bool is_empty(int *c_id, int *p_id) {
+    __sync_synchronize();
+    return *c_id == *p_id;
+}
+
+void enqueueJob(uchar *threadBlockQueue, int *producerIndex, int image_idx,uchar * images_in, int image_size, uchar valid){
+    int offsetFromQueue = (*producerIndex) * (1 + image_size);
+    if(valid == VALID){
+        memcpy(threadBlockQueue + offsetFromQueue +1, images_in + (image_idx * image_size), image_size);
+    }
+    memcpy(threadBlockQueue + offsetFromQueue, &valid, sizeof(uchar));
+    __sync_synchronize();
+    *producerIndex = INCREASE_PC_POINTER(*producerIndex);
+    __sync_synchronize();
+}
+
+void dequeueJob(uchar *queue, int fetchedSlot, int image_idx, uchar *images_out, int image_size){
+    int offsetFromQueue = (fetchedSlot * image_size);
+    __sync_synchronize();
+    memcpy(images_out + (image_idx * image_size), queue + offsetFromQueue, image_size);
+}
+
 
 void process_image(uchar *img_in, uchar *img_out) {
     int histogram[256] = { 0 };
@@ -101,6 +131,8 @@ struct client_context {
     struct ibv_mr *mr_images_out;
 
     uchar *images_out_from_gpu;
+
+    int *requestPerTbSlot, *nextFetchedSlot;
 
     /* TODO add necessary context to track the client side of the GPU's producer/consumer queues */
 };
@@ -423,17 +455,65 @@ void process_images(struct client_context *ctx)
                      &ctx->images_out_from_gpu[img_idx * SQR(IMG_DIMENSION)]);
         }
     } else {
-        /* TODO use the queues implementation from homework 2 using RDMA */
+        const int IMAGE_SIZE = SQR(IMG_DIMENSION);
+
+        ctx->requestPerTbSlot = (int *) malloc(ctx->server_info.numberOfThreadBlocks * ctx->server_info.numberOfSlots * sizeof(int));
+        ctx->nextFetchedSlot = (int *) malloc(ctx->server_info.numberOfThreadBlocks * sizeof(int));
+
+        memset(ctx->nextFetchedSlot, 0, ctx->server_info.numberOfThreadBlocks * sizeof(int));
+        memset(ctx->requestPerTbSlot, INVALID, ctx->server_info.numberOfThreadBlocks * ctx->server_info.numberOfSlots * sizeof(int));
 
         for (int img_idx = 0; img_idx < NREQUESTS; ++img_idx) {
-            /* TODO check producer consumer queue for any responses.
-             * don't block. if no responses are there we'll check again in the next iteration
-             */
+            int chosenThreadBlock = INVALID;
+            while (chosenThreadBlock == INVALID) {
+                for (int threadBlock_i = 0; threadBlock_i < ctx->server_info.numberOfThreadBlocks; threadBlock_i++) {
+                    // read completed requests from tb
+                    while (!is_empty(ctx->nextFetchedSlot + threadBlock_i, ctx->server_info.consumerIndex + threadBlock_i)) {
+                        int nextSlot = ctx->nextFetchedSlot[threadBlock_i];
+                        int *currentRequestPerTbSlot = ctx->requestPerTbSlot + (threadBlock_i * ctx->server_info.numberOfSlots);
+                        int completeRequest = currentRequestPerTbSlot[nextSlot];
 
-            /* TODO push task to queue */
+                        dequeueJob(ctx->server_info.gpu2cpuQueue + (threadBlock_i * ctx->server_info.numberOfSlots * IMAGE_SIZE), nextSlot, completeRequest,
+                                   ctx->images_out_from_gpu, IMAGE_SIZE);
+                        currentRequestPerTbSlot[nextSlot] = INVALID;
+                        ctx->nextFetchedSlot[threadBlock_i] = INCREASE_PC_POINTER(nextSlot);
+                    }
+                    if (chosenThreadBlock == INVALID &&
+                        !is_queue_full(ctx->server_info.producerIndex + threadBlock_i, ctx->server_info.consumerIndex + threadBlock_i)) {
+                        chosenThreadBlock = threadBlock_i;
+                    }
+                }
+            }
+
+            ctx->requestPerTbSlot[chosenThreadBlock * ctx->server_info.numberOfSlots +
+                             ctx->server_info.producerIndex[chosenThreadBlock]] = img_idx;//save the request in the slot
+            enqueueJob(ctx->server_info.cpu2gpuQueue + (chosenThreadBlock * ctx->server_info.numberOfSlots * ctx->server_info.slotSize2GPU),
+                       ctx->server_info.producerIndex + chosenThreadBlock, img_idx, ctx->images_in, IMAGE_SIZE, VALID);
         }
-        /* TODO wait until you have responses for all requests */
-    }
+        /* wait until you have responses for all requests and inform GPU to halt*/
+        int all_done = false;
+        while (!all_done) {
+            all_done = true;
+            for (int threadBlock_i = 0; threadBlock_i < ctx->numberOfThreadBlocks; threadBlock_i++) {
+                // read completed requests from tb
+                if (!is_empty(ctx->server_info.producerIndex + threadBlock_i, ctx->server_info.consumerIndex + threadBlock_i)) {
+                    all_done = false;
+                    continue;
+                }
+                while (!is_empty(ctx->nextFetchedSlot + threadBlock_i, ctx->server_info.consumerIndex + threadBlock_i)) {
+                    int nextSlot = ctx->nextFetchedSlot[threadBlock_i];
+                    int *currentRequestPerTbSlot = ctx->requestPerTbSlot + (threadBlock_i * ctx->server_info.numberOfSlots);
+                    int completeRequest = currentRequestPerTbSlot[nextSlot];
+                    dequeueJob(ctx->server_info.gpu2cpuQueue + (threadBlock_i * ctx->server_info.numberOfSlots * IMAGE_SIZE), nextSlot, completeRequest,
+                               ctx->images_out_from_gpu, IMAGE_SIZE);
+                    currentRequestPerTbSlot[nextSlot] = INVALID;
+                    ctx->nextFetchedSlot[threadBlock_i] = INCREASE_PC_POINTER(nextSlot);
+                }
+            }
+        }
+        for (int threadBlock_i = 0; threadBlock_i < numberOfThreadBlocks; threadBlock_i++) {
+            enqueueJob(ctx->server_info.cpu2gpuQueue + (threadBlock_i * ctx->server_info.numberOfSlots * ctx->server_info.slotSize2GPU), ctx->server_info.producerIndex + threadBlock_i, 0, 0, IMAGE_SIZE, 0);
+        }
 
     double tf = get_time_msec();
 

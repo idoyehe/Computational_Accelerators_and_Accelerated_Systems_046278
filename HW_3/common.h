@@ -51,10 +51,13 @@ struct rpc_request
 struct ib_info_t {
     int lid;
     int qpn;
+
+    uchar *cpu2gpuQueue, *gpu2cpuQueue;
+    int *producerIndex, *consumerIndex;
+    int numberOfSlots;
+    int numberOfThreadBlocks;
+    int slotSize2GPU, slotSize2CPU;
     /* TODO add additional server rkeys / addresses here if needed */
-
-    /* TODO communicate number of queues / blocks, other information needed to operate the GPU queues remotely */
-
 };
 
 enum mode_enum {

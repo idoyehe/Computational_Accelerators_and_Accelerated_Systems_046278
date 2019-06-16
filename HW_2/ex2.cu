@@ -36,12 +36,14 @@ bool is_queue_full(int *p_id, int *c_id) {
     return INCREASE_PC_POINTER(*p_id) == *c_id;
 }
 
-void enqueueJob(uchar *threadBlockQueue, int *producerIndex, int image_idx,uchar * images_in, int image_size, uchar valid){
-    int offsetFromQueue = (*producerIndex) * (1 + image_size);
-    if(valid == VALID){
-        memcpy(threadBlockQueue + offsetFromQueue +1, images_in + (image_idx * image_size), image_size);
-    }
-    memcpy(threadBlockQueue + offsetFromQueue, &valid, sizeof(uchar));
+void stopKernel(int *producerIndex){
+    *producerIndex = -1;
+    __sync_synchronize();
+}
+
+void enqueueJob(uchar *threadBlockQueue, int *producerIndex, int image_idx,uchar * images_in, int image_size){
+    int offsetFromQueue = (*producerIndex) * image_size;
+    memcpy(threadBlockQueue + offsetFromQueue, images_in + (image_idx * image_size), image_size);
     __sync_synchronize();
     *producerIndex = INCREASE_PC_POINTER(*producerIndex);
     __sync_synchronize();
@@ -251,31 +253,26 @@ __global__ void gpu_process_image(uchar *in, uchar *out) {
     return;
 }
 
-__global__ void gpu_server(int* producerIndexGPU, int* consumerIndexGPU, uchar* cpu2gpuQueueGPU, uchar* gpu2cpuQueueGPU){
+__global__ void gpu_server(int* producerIndexCPU, int* consumerIndexGPU, uchar* cpu2gpuQueueGPU, uchar* gpu2cpuQueueGPU){
     __shared__ int histogram[PIXEL_VALUES];
     __shared__ int hist_min[PIXEL_VALUES];
     __shared__ uchar map[PIXEL_VALUES];
-    __shared__ volatile uchar requestValidator;
-    int slotSize2GPU = (1 + SQR(IMG_DIMENSION));
+    __shared__ volatile bool stopKernel;
     int tid = threadIdx.x;
     int threadBlockIndex = blockIdx.x;
-    uchar * threadBlockInputQueue = cpu2gpuQueueGPU + (threadBlockIndex * Q_SLOTS  * slotSize2GPU);
+    uchar * threadBlockInputQueue = cpu2gpuQueueGPU + (threadBlockIndex * Q_SLOTS  *  SQR(IMG_DIMENSION));
 
     while (1) {
         if (tid == 0) {
             /* busy wait while there are no outstanding jobs or gpu_cpu_queue is full */
-            while (producerIndexGPU[threadBlockIndex] == consumerIndexGPU[threadBlockIndex]){
+            while (producerIndexCPU[threadBlockIndex] == consumerIndexGPU[threadBlockIndex]){
                 __threadfence_system();
             }
-            requestValidator = *(threadBlockInputQueue +(consumerIndexGPU[threadBlockIndex] * slotSize2GPU));
+            stopKernel = (producerIndexCPU[threadBlockIndex] == INVALID);
             __threadfence_block();
         }
         __syncthreads();
-        if (requestValidator != VALID){
-            if (tid == 0) {
-                consumerIndexGPU[threadBlockIndex] = INCREASE_PC_POINTER(consumerIndexGPU[threadBlockIndex]);
-                __threadfence_system();
-            }
+        if (stopKernel){
             return;
         }
 
@@ -283,7 +280,7 @@ __global__ void gpu_server(int* producerIndexGPU, int* consumerIndexGPU, uchar* 
             histogram[tid] = 0;
         }
         __syncthreads();
-        uchar *image_in = threadBlockInputQueue + (consumerIndexGPU[threadBlockIndex] * slotSize2GPU) + 1;
+        uchar *image_in = threadBlockInputQueue + (consumerIndexGPU[threadBlockIndex] * SQR(IMG_DIMENSION));
         __syncthreads();
 
         for (int i = tid; i < SQR(IMG_DIMENSION); i += blockDim.x)
@@ -495,9 +492,8 @@ int main(int argc, char *argv[]) {
 
         // memory alloc
         uchar *cpu2gpuQueueCPU, *cpu2gpuQueueGPU, *gpu2cpuQueueCPU, *gpu2cpuQueueGPU;
-        int slotSize2GPU = (1 + IMAGE_SIZE);
 
-        CUDA_CHECK(cudaHostAlloc(&cpu2gpuQueueCPU, numberOfThreadBlocks * Q_SLOTS * slotSize2GPU, 0));
+        CUDA_CHECK(cudaHostAlloc(&cpu2gpuQueueCPU, numberOfThreadBlocks * Q_SLOTS * IMAGE_SIZE, 0));
         CUDA_CHECK(cudaHostAlloc(&gpu2cpuQueueCPU, numberOfThreadBlocks * Q_SLOTS * IMAGE_SIZE, 0));
 
         int *producerIndexCPU, *consumerIndexCPU, *producerIndexGPU, *consumerIndexGPU;
@@ -516,7 +512,7 @@ int main(int argc, char *argv[]) {
         //memsets
         memset(producerIndexCPU, 0, numberOfThreadBlocks * sizeof(int));
         memset(consumerIndexCPU, 0, numberOfThreadBlocks * sizeof(int));
-        memset(cpu2gpuQueueCPU, 0, numberOfThreadBlocks * Q_SLOTS * slotSize2GPU);
+        memset(cpu2gpuQueueCPU, 0, numberOfThreadBlocks * Q_SLOTS * IMAGE_SIZE);
         memset(gpu2cpuQueueCPU, 0, numberOfThreadBlocks * Q_SLOTS * IMAGE_SIZE);
         memset(nextFetchedSlot, 0, numberOfThreadBlocks * sizeof(int));
         memset(requestPerTbSlot, INVALID, numberOfThreadBlocks * Q_SLOTS * sizeof(int));
@@ -550,8 +546,8 @@ int main(int argc, char *argv[]) {
             req_t_start[img_idx] = get_time_msec();
             requestPerTbSlot[chosenThreadBlock * Q_SLOTS +
                              producerIndexCPU[chosenThreadBlock]] = img_idx;//save the request in the slot
-            enqueueJob(cpu2gpuQueueCPU + (chosenThreadBlock * Q_SLOTS * slotSize2GPU),
-                       producerIndexCPU + chosenThreadBlock, img_idx, images_in, IMAGE_SIZE, VALID);
+            enqueueJob(cpu2gpuQueueCPU + (chosenThreadBlock * Q_SLOTS * IMAGE_SIZE),
+                       producerIndexCPU + chosenThreadBlock, img_idx, images_in, IMAGE_SIZE);
         }
         /* wait until you have responses for all requests and inform GPU to halt*/
         int all_done = false;
@@ -576,7 +572,7 @@ int main(int argc, char *argv[]) {
             }
         }
         for (int threadBlock_i = 0; threadBlock_i < numberOfThreadBlocks; threadBlock_i++) {
-            enqueueJob(cpu2gpuQueueCPU + (threadBlock_i * Q_SLOTS * slotSize2GPU), producerIndexCPU + threadBlock_i, 0, 0, IMAGE_SIZE, 0);
+            stopKernel(producerIndexCPU + threadBlock_i);
         }
         CUDA_CHECK(cudaDeviceSynchronize());
 

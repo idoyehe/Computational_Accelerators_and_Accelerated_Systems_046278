@@ -54,6 +54,10 @@ struct ib_info_t {
 
     uchar *cpu2gpuQueue, *gpu2cpuQueue;
     int *producerIndex, *consumerIndex;
+
+    uint32_t rkey_cpu2gpuQueue, rkey_gpu2cpuQueue;
+    uint32_t rkey_producerIndex, rkey_consumerIndex;
+
     int numberOfSlots;
     int numberOfThreadBlocks;
     int slotSize2GPU, slotSize2CPU;

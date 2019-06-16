@@ -76,9 +76,13 @@ int numOfThreadBlocksCalc(int threadsPerBlock) {
     return minBlocksPerSM * currDeviceProperties.multiProcessorCount;
 }
 
-bool is_empty(int *c_id, int *p_id) {
+bool kernel_idle(int *c_id, int *p_id) {
     __sync_synchronize();
     return *c_id == *p_id;
+}
+
+bool need_to_fetch(int *c_id, int *p_id) {
+    return *c_id != *p_id;
 }
 
 void process_image(uchar *img_in, uchar *img_out) {
@@ -523,7 +527,7 @@ int main(int argc, char *argv[]) {
             while (chosenThreadBlock == INVALID) {
                 for (int threadBlock_i = 0; threadBlock_i < numberOfThreadBlocks; threadBlock_i++) {
                     // read completed requests from tb
-                    while (!is_empty(nextFetchedSlot + threadBlock_i, consumerIndexCPU + threadBlock_i)) {
+                    while (need_to_fetch(nextFetchedSlot + threadBlock_i, consumerIndexCPU + threadBlock_i)) {
                         int nextSlot = nextFetchedSlot[threadBlock_i];
                         int *currentRequestPerTbSlot = requestPerTbSlot + (threadBlock_i * Q_SLOTS);
                         int completeRequest = currentRequestPerTbSlot[nextSlot];
@@ -555,11 +559,11 @@ int main(int argc, char *argv[]) {
             all_done = true;
             for (int threadBlock_i = 0; threadBlock_i < numberOfThreadBlocks; threadBlock_i++) {
                 // read completed requests from tb
-                if (!is_empty(producerIndexCPU + threadBlock_i, consumerIndexCPU + threadBlock_i)) {
+                if (!kernel_idle(producerIndexCPU + threadBlock_i, consumerIndexCPU + threadBlock_i)) {
                     all_done = false;
                     continue;
                 }
-                while (!is_empty(nextFetchedSlot + threadBlock_i, consumerIndexCPU + threadBlock_i)) {
+                while (need_to_fetch(nextFetchedSlot + threadBlock_i, consumerIndexCPU + threadBlock_i)) {
                     int nextSlot = nextFetchedSlot[threadBlock_i];
                     int *currentRequestPerTbSlot = requestPerTbSlot + (threadBlock_i * Q_SLOTS);
                     int completeRequest = currentRequestPerTbSlot[nextSlot];

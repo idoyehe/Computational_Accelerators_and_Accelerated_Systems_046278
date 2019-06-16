@@ -12,18 +12,193 @@
 #define INVALID -1
 #define VALID 1
 
-bool is_queue_full(int *p_id, int *c_id) {
-    __sync_synchronize();
-    return INCREASE_PC_POINTER(*p_id) == *c_id;
+struct client_context {
+    enum mode_enum mode;
+    struct ib_info_t server_info;
+
+    struct ibv_context *context;
+    struct ibv_pd *pd;
+    struct ibv_qp *qp;
+    struct ibv_cq *cq;
+    int server_key;
+    long long server_addr;
+
+    struct rpc_request* requests;
+    struct ibv_mr *mr_requests;
+    uchar *images_in;
+    struct ibv_mr *mr_images_in;
+    uchar *images_out;
+    struct ibv_mr *mr_images_out;
+
+    uchar *images_out_from_gpu;
+
+    int producerIndex, consumerIndex;
+    struct ibv_mr *mr_producerIndex;
+    struct ibv_mr *mr_consumerIndex;
+
+    int *requestPerTbSlot, *nextFetchedSlot;
+};
+
+
+
+bool is_queue_full(struct client_context *ctx, int *p_id, int *c_id) {
+    struct ibv_send_wr wr;
+    struct ibv_send_wr *bad_wr;
+    struct ibv_wc wc;
+
+    struct ibv_sge sg; /* scatter/gather element */
+
+    /* RDMA send needs a gather element (local buffer)*/
+    memset(&wr, 0, sizeof(struct ibv_send_wr));
+    sg.addr = (uintptr_t)&(ctx->producerIndex);
+    sg.length = sizeof(int);
+    sg.lkey = ctx->mr_producerIndex->lkey;
+
+    wr.wr_id = 0;
+    wr.sg_list = &sgl;
+    wr.num_sge = 1;
+    wr.opcode = IBV_WR_RDMA_READ;
+    wr.send_flags = IBV_SEND_SIGNALED;
+    wr.wr.rdma.remote_addr = p_id;
+    wr.wr.rdma.rkey = ctx->server_info.rkey_producerIndex;
+
+    if (ibv_post_send(ctx->qp, &er, &bad_wr)) {
+        printf("ERROR: ibv_post_send() failed\n");
+        exit(1);
+    }
+
+    struct ibv_wc wc;
+    int ncqes;
+    do {
+        ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
+    } while (ncqes == 0);
+    if (ncqes < 0) {
+        printf("ERROR: ibv_poll_cq() failed\n");
+        exit(1);
+    }
+    if (wc.status != IBV_WC_SUCCESS) {
+        printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status), wc.status, __LINE__);
+        exit(1);
+    }
+
+/* RDMA send needs a gather element (local buffer)*/
+    memset(&wr, 0, sizeof(struct ibv_send_wr));
+    sg.addr = (uintptr_t)&(ctx->consumerIndex);
+    sg.length = sizeof(int);
+    sg.lkey = ctx->mr_consumerIndex->lkey;
+
+    wr.wr_id = 0;
+    wr.sg_list = &sgl;
+    wr.num_sge = 1;
+    wr.opcode = IBV_WR_RDMA_READ;
+    wr.send_flags = IBV_SEND_SIGNALED;
+    wr.wr.rdma.remote_addr = c_id;
+    wr.wr.rdma.rkey = ctx->server_info.rkey_consumerIndex;
+
+    if (ibv_post_send(ctx->qp, &er, &bad_wr)) {
+        printf("ERROR: ibv_post_send() failed\n");
+        exit(1);
+    }
+
+    do {
+        ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
+    } while (ncqes == 0);
+    if (ncqes < 0) {
+        printf("ERROR: ibv_poll_cq() failed\n");
+        exit(1);
+    }
+    if (wc.status != IBV_WC_SUCCESS) {
+        printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status), wc.status, __LINE__);
+        exit(1);
+    }
+
+    return ((ctx->producerIndex +1) % ctx->server_info.numberOfSlots) == ctx->consumerIndex;
 }
 
-bool is_empty(int *c_id, int *p_id) {
-    __sync_synchronize();
-    return *c_id == *p_id;
+bool is_empty(struct client_context *ctx,int *c_id, int *p_id) {
+    struct ibv_send_wr wr;
+    struct ibv_send_wr *bad_wr;
+    struct ibv_wc wc;
+
+    struct ibv_sge sg; /* scatter/gather element */
+
+    /* RDMA send needs a gather element (local buffer)*/
+    memset(&wr, 0, sizeof(struct ibv_send_wr));
+    sg.addr = (uintptr_t)&(ctx->consumerIndex);
+    sg.length = sizeof(int);
+    sg.lkey = ctx->mr_consumerIndex->lkey;
+
+    wr.wr_id = 0;
+    wr.sg_list = &sgl;
+    wr.num_sge = 1;
+    wr.opcode = IBV_WR_RDMA_READ;
+    wr.send_flags = IBV_SEND_SIGNALED;
+    wr.wr.rdma.remote_addr = p_id;
+    wr.wr.rdma.rkey = ctx->server_info.rkey_consumerIndex;
+
+    if (ibv_post_send(ctx->qp, &er, &bad_wr)) {
+        printf("ERROR: ibv_post_send() failed\n");
+        exit(1);
+    }
+
+    struct ibv_wc wc;
+    int ncqes;
+    do {
+        ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
+    } while (ncqes == 0);
+    if (ncqes < 0) {
+        printf("ERROR: ibv_poll_cq() failed\n");
+        exit(1);
+    }
+    if (wc.status != IBV_WC_SUCCESS) {
+        printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status), wc.status, __LINE__);
+        exit(1);
+    }
+
+    return (*c_id)  == ctx->consumerIndex;
 }
 
-void enqueueJob(uchar *threadBlockQueue, int *producerIndex, int image_idx,uchar * images_in, int image_size, uchar valid){
-    int offsetFromQueue = (*producerIndex) * (1 + image_size);
+void enqueueJob(struct client_context *ctx, uchar *threadBlockQueue, int *producerIndex, int image_idx,uchar * images_in, int image_size, uchar valid){
+    struct ibv_send_wr wr;
+    struct ibv_send_wr *bad_wr;
+    struct ibv_wc wc;
+
+    struct ibv_sge sg; /* scatter/gather element */
+
+    /* RDMA send needs a gather element (local buffer)*/
+    memset(&wr, 0, sizeof(struct ibv_send_wr));
+    sg.addr = (uintptr_t)&ctx->producerIndex;
+    sg.length = sizeof(int);
+    sg.lkey = ctx->mr_producerIndex->lkey;
+
+    wr.wr_id = 0;
+    wr.sg_list = &sgl;
+    wr.num_sge = 1;
+    wr.opcode = IBV_WR_RDMA_READ;
+    wr.send_flags = IBV_SEND_SIGNALED;
+    wr.wr.rdma.remote_addr = producerIndex;
+    wr.wr.rdma.rkey = ctx->server_info.rkey_producerIndex;
+
+    if (ibv_post_send(ctx->qp, &er, &bad_wr)) {
+        printf("ERROR: ibv_post_send() failed\n");
+        exit(1);
+    }
+
+    struct ibv_wc wc;
+    int ncqes;
+    do {
+        ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
+    } while (ncqes == 0);
+    if (ncqes < 0) {
+        printf("ERROR: ibv_poll_cq() failed\n");
+        exit(1);
+    }
+    if (wc.status != IBV_WC_SUCCESS) {
+        printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status), wc.status, __LINE__);
+        exit(1);
+    }
+
+    int offsetFromQueue = ctx->producerIndex * (1 + image_size);
     if(valid == VALID){
         memcpy(threadBlockQueue + offsetFromQueue +1, images_in + (image_idx * image_size), image_size);
     }
@@ -33,7 +208,7 @@ void enqueueJob(uchar *threadBlockQueue, int *producerIndex, int image_idx,uchar
     __sync_synchronize();
 }
 
-void dequeueJob(uchar *queue, int fetchedSlot, int image_idx, uchar *images_out, int image_size){
+void dequeueJob(struct client_context *ctx, uchar *queue, int fetchedSlot, int image_idx, uchar *images_out, int image_size){
     int offsetFromQueue = (fetchedSlot * image_size);
     __sync_synchronize();
     memcpy(images_out + (image_idx * image_size), queue + offsetFromQueue, image_size);
@@ -112,30 +287,7 @@ void load_images(uchar *images) {
     }
 }
 
-struct client_context {
-    enum mode_enum mode;
-    struct ib_info_t server_info;
 
-    struct ibv_context *context;
-    struct ibv_pd *pd;
-    struct ibv_qp *qp;
-    struct ibv_cq *cq;
-    int server_key;
-    long long server_addr;
-
-    struct rpc_request* requests;
-    struct ibv_mr *mr_requests;
-    uchar *images_in;
-    struct ibv_mr *mr_images_in;
-    uchar *images_out;
-    struct ibv_mr *mr_images_out;
-
-    uchar *images_out_from_gpu;
-
-    int *requestPerTbSlot, *nextFetchedSlot;
-
-    /* TODO add necessary context to track the client side of the GPU's producer/consumer queues */
-};
 
 void rpc_call(struct client_context *ctx,
               int request_id,
@@ -395,6 +547,8 @@ void teardown_connection(struct client_context *ctx) {
         ibv_dereg_mr(ctx->mr_images_out);
     }
     ibv_dereg_mr(ctx->mr_requests);
+    ibv_dereg_mr(ctx->mr_producerIndex);
+    ibv_dereg_mr(ctx->mr_consumerIndex);
     ibv_destroy_qp(ctx->qp);
     ibv_destroy_cq(ctx->cq);
     ibv_dealloc_pd(ctx->pd);
@@ -425,6 +579,24 @@ void allocate_and_register_memory(struct client_context *ctx)
     ctx->mr_requests = ibv_reg_mr(ctx->pd, requests, sizeof(struct rpc_request), 0);
     if (!ctx->mr_requests) {
         perror("Unable to create MR for sends");
+        exit(1);
+    }
+
+    ctx->mr_requests = ibv_reg_mr(ctx->pd, requests, sizeof(struct rpc_request), 0);
+    if (!ctx->mr_requests) {
+        perror("Unable to create MR for sends");
+        exit(1);
+    }
+
+    ctx->mr_producerIndex = ibv_reg_mr(ctx->pd,&ctx->producerIndex, sizeof(int), IBV_ACCESS_LOCAL_WRITE);
+    if (!ctx->mr_producerIndex) {
+        perror("Unable to create MR for producer index");
+        exit(1);
+    }
+
+    ctx->mr_consumerIndex = ibv_reg_mr(ctx->pd,&ctx->consumerIndex, sizeof(int), IBV_ACCESS_LOCAL_WRITE);
+    if (!ctx->mr_consumerIndex) {
+        perror("Unable to create MR for consumer index");
         exit(1);
     }
 }
@@ -468,7 +640,7 @@ void process_images(struct client_context *ctx)
             while (chosenThreadBlock == INVALID) {
                 for (int threadBlock_i = 0; threadBlock_i < ctx->server_info.numberOfThreadBlocks; threadBlock_i++) {
                     // read completed requests from tb
-                    while (!is_empty(ctx->nextFetchedSlot + threadBlock_i, ctx->server_info.consumerIndex + threadBlock_i)) {
+                    while (!is_empty(ctx, ctx->nextFetchedSlot + threadBlock_i, ctx->server_info.consumerIndex + threadBlock_i)) {
                         int nextSlot = ctx->nextFetchedSlot[threadBlock_i];
                         int *currentRequestPerTbSlot = ctx->requestPerTbSlot + (threadBlock_i * ctx->server_info.numberOfSlots);
                         int completeRequest = currentRequestPerTbSlot[nextSlot];
@@ -479,7 +651,7 @@ void process_images(struct client_context *ctx)
                         ctx->nextFetchedSlot[threadBlock_i] = INCREASE_PC_POINTER(nextSlot);
                     }
                     if (chosenThreadBlock == INVALID &&
-                        !is_queue_full(ctx->server_info.producerIndex + threadBlock_i, ctx->server_info.consumerIndex + threadBlock_i)) {
+                        !is_queue_full(ctx, ctx->server_info.producerIndex + threadBlock_i, ctx->server_info.consumerIndex + threadBlock_i)) {
                         chosenThreadBlock = threadBlock_i;
                     }
                 }
@@ -487,7 +659,7 @@ void process_images(struct client_context *ctx)
 
             ctx->requestPerTbSlot[chosenThreadBlock * ctx->server_info.numberOfSlots +
                              ctx->server_info.producerIndex[chosenThreadBlock]] = img_idx;//save the request in the slot
-            enqueueJob(ctx->server_info.cpu2gpuQueue + (chosenThreadBlock * ctx->server_info.numberOfSlots * ctx->server_info.slotSize2GPU),
+            enqueueJob(ctx, ctx->server_info.cpu2gpuQueue + (chosenThreadBlock * ctx->server_info.numberOfSlots * ctx->server_info.slotSize2GPU),
                        ctx->server_info.producerIndex + chosenThreadBlock, img_idx, ctx->images_in, IMAGE_SIZE, VALID);
         }
         /* wait until you have responses for all requests and inform GPU to halt*/

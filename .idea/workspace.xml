@@ -10,9 +10,6 @@
     <list default="true" id="35120ce7-1503-4c4c-acbe-83c986712c4b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HW_2/ex2.cu" beforeDir="false" afterPath="$PROJECT_DIR$/HW_2/ex2.cu" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HW_3/client.c" beforeDir="false" afterPath="$PROJECT_DIR$/HW_3/client.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HW_3/common.h" beforeDir="false" afterPath="$PROJECT_DIR$/HW_3/common.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HW_3/server.cu" beforeDir="false" afterPath="$PROJECT_DIR$/HW_3/server.cu" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -32,8 +29,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="550">
-              <caret line="569" column="95" lean-forward="true" selection-start-line="569" selection-start-column="95" selection-end-line="569" selection-end-column="95" />
+            <state relative-caret-position="395">
+              <caret line="561" column="31" selection-start-line="561" selection-start-column="31" selection-end-line="561" selection-end-column="31" />
             </state>
           </provider>
         </entry>
@@ -226,14 +223,7 @@
       <workItem from="1560622923132" duration="3797000" />
       <workItem from="1560626946265" duration="261000" />
       <workItem from="1560700452910" duration="11071000" />
-      <workItem from="1560714377190" duration="878000" />
-    </task>
-    <task id="LOCAL-00009" summary="debug arr_min">
-      <created>1556815907418</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1556815907418</updated>
+      <workItem from="1560714377190" duration="1035000" />
     </task>
     <task id="LOCAL-00010" summary="debug arr_min">
       <created>1556816023685</created>
@@ -571,11 +561,18 @@
       <option name="project" value="LOCAL" />
       <updated>1560714996474</updated>
     </task>
-    <option name="localTasksCounter" value="58" />
+    <task id="LOCAL-00058" summary="HW_2 minor refactoring for HW_3">
+      <created>1560715318366</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1560715318366</updated>
+    </task>
+    <option name="localTasksCounter" value="59" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="121790000" />
+    <option name="totallyTimeSpent" value="121947000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -650,7 +647,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="debug arr_min" />
     <MESSAGE value="debug prefix_sum" />
     <MESSAGE value="add free gpu memory" />
     <MESSAGE value="seperating number of threads serial / bulk" />
@@ -675,7 +671,8 @@
     <MESSAGE value="HW_3 first commit" />
     <MESSAGE value="HW_3 put code from HW 2" />
     <MESSAGE value="HW_2 minor refactoring" />
-    <option name="LAST_COMMIT_MESSAGE" value="HW_2 minor refactoring" />
+    <MESSAGE value="HW_2 minor refactoring for HW_3" />
+    <option name="LAST_COMMIT_MESSAGE" value="HW_2 minor refactoring for HW_3" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt" />
@@ -765,8 +762,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="550">
-          <caret line="569" column="95" lean-forward="true" selection-start-line="569" selection-start-column="95" selection-end-line="569" selection-end-column="95" />
+        <state relative-caret-position="395">
+          <caret line="561" column="31" selection-start-line="561" selection-start-column="31" selection-end-line="561" selection-end-column="31" />
         </state>
       </provider>
     </entry>

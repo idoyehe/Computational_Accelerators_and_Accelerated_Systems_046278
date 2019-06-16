@@ -559,9 +559,8 @@ int main(int argc, char *argv[]) {
             all_done = true;
             for (int threadBlock_i = 0; threadBlock_i < numberOfThreadBlocks; threadBlock_i++) {
                 // read completed requests from tb
-                if (!kernel_idle(producerIndexCPU + threadBlock_i, consumerIndexCPU + threadBlock_i)) {
+                if (all_done && !kernel_idle(producerIndexCPU + threadBlock_i, consumerIndexCPU + threadBlock_i)) {
                     all_done = false;
-                    continue;
                 }
                 while (need_to_fetch(nextFetchedSlot + threadBlock_i, consumerIndexCPU + threadBlock_i)) {
                     int nextSlot = nextFetchedSlot[threadBlock_i];

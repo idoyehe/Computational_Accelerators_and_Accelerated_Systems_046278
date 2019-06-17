@@ -13,9 +13,9 @@
 #define TCP_PORT_OFFSET 23456
 #define TCP_PORT_RANGE 1000
 #define THREADS_PER_BLOCK 1024
-#define MAX_REGISTER_COUNT 32
-#define SHARED_MEM_PER_BLOCK  (PIXEL_VALUES * (1 + 2 * sizeof(int)) + 1)
-#define PIXEL_VALUES 256
+#define Q_SLOTS 10
+#define VALID 1
+#define INCREASE_PC_POINTER(X) ((X) + 1) % Q_SLOTS
 
 #define CUDA_CHECK(f) do {                                                                  \
     cudaError_t e = f;                                                                      \
@@ -126,27 +126,31 @@ int numOfThreadBlocksCalc() {
     return minBlocksPerSM * currDeviceProperties.multiProcessorCount;
 }
 
-
-__global__ void gpu_server(int* producerIndexCPU, int* consumerIndexGPU, uchar* cpu2gpuQueueGPU, uchar* gpu2cpuQueueGPU){
+__global__ void gpu_server(int* producerIndexGPU, int* consumerIndexGPU, uchar* cpu2gpuQueueGPU, uchar* gpu2cpuQueueGPU){
     __shared__ int histogram[PIXEL_VALUES];
     __shared__ int hist_min[PIXEL_VALUES];
     __shared__ uchar map[PIXEL_VALUES];
-    __shared__ volatile bool stopKernel;
+    __shared__ volatile uchar requestValidator;
+    int slotSize2GPU = (1 + SQR(IMG_DIMENSION));
     int tid = threadIdx.x;
     int threadBlockIndex = blockIdx.x;
-    uchar * threadBlockInputQueue = cpu2gpuQueueGPU + (threadBlockIndex * Q_SLOTS  *  SQR(IMG_DIMENSION));
+    uchar * threadBlockInputQueue = cpu2gpuQueueGPU + (threadBlockIndex * Q_SLOTS  * slotSize2GPU);
 
     while (1) {
         if (tid == 0) {
             /* busy wait while there are no outstanding jobs or gpu_cpu_queue is full */
-            while (producerIndexCPU[threadBlockIndex] == consumerIndexGPU[threadBlockIndex]){
+            while (producerIndexGPU[threadBlockIndex] == consumerIndexGPU[threadBlockIndex]){
                 __threadfence_system();
             }
-            stopKernel = (producerIndexCPU[threadBlockIndex] == INVALID);
+            requestValidator = *(threadBlockInputQueue +(consumerIndexGPU[threadBlockIndex] * slotSize2GPU));
             __threadfence_block();
         }
         __syncthreads();
-        if (stopKernel){
+        if (requestValidator != VALID){
+            if (tid == 0) {
+                consumerIndexGPU[threadBlockIndex] = INCREASE_PC_POINTER(consumerIndexGPU[threadBlockIndex]);
+                __threadfence_system();
+            }
             return;
         }
 
@@ -154,7 +158,7 @@ __global__ void gpu_server(int* producerIndexCPU, int* consumerIndexGPU, uchar* 
             histogram[tid] = 0;
         }
         __syncthreads();
-        uchar *image_in = threadBlockInputQueue + (consumerIndexGPU[threadBlockIndex] * SQR(IMG_DIMENSION));
+        uchar *image_in = threadBlockInputQueue + (consumerIndexGPU[threadBlockIndex] * slotSize2GPU) + 1;
         __syncthreads();
 
         for (int i = tid; i < SQR(IMG_DIMENSION); i += blockDim.x)
@@ -194,9 +198,6 @@ __global__ void gpu_server(int* producerIndexCPU, int* consumerIndexGPU, uchar* 
         __syncthreads();
     }
 }
-
-/* TODO: copy queue-based GPU kernel from hw2 */
-/* TODO: end */
 
 void process_image_on_gpu(uchar *img_in, uchar *img_out)
 {
@@ -238,39 +239,61 @@ struct server_context {
     struct ibv_mr *mr_images_in; /* Memory region for input images */
     struct ibv_mr *mr_images_out; /* Memory region for output images */
 
+    uchar *cpu2gpuQueueCPU, *cpu2gpuQueueGPU, *gpu2cpuQueueCPU, *gpu2cpuQueueGPU;
+    struct ibv_mr *mr_cpu2gpuQueueCPU;
+    struct ibv_mr *mr_gpu2cpuQueueCPU;
+
+
+    int cpu2gpuQueueSize, gpu2cpuQueueSize;
+    int slotSize2GPU, slotSize2CPU;
+
+
+    int *producerIndexCPU, *consumerIndexCPU, *producerIndexGPU, *consumerIndexGPU;
+    struct ibv_mr *mr_producerIndexCPU;
+    struct ibv_mr *mr_consumerIndexCPU;
+
+    int producerIndexSize, consumerIndexSize;
     int numberOfThreadBlocks;
 
-    uchar *cpu2gpuQ, *gpu2cpuQ; /* queues */
-
-    int *producer, *consumer; /* producer and consumer index */
-
-
-    struct ibv_mr *mr_cpu2gpuQ; /* Memory region for CPU to GPU Queue */
-    struct ibv_mr *mr_gpu2cpuQ; /* Memory region for GPU to CPU Queue */
-
-    struct ibv_mr *mr_producer; /* Memory region for producer index */
-    struct ibv_mr *mr_consumer; /* Memory region for consumer index */
-
-    /* TODO: add pointers and memory region(s) for CPU-GPU queues */
-    
 };
 
 void allocate_memory(server_context *ctx)
 {
-    const int IMAGE_SIZE = SQR(IMG_DIMENSION);
-
-    CUDA_CHECK(cudaHostAlloc(&ctx->images_in, OUTSTANDING_REQUESTS * IMAGE_SIZE, 0));
-    CUDA_CHECK(cudaHostAlloc(&ctx->images_out, OUTSTANDING_REQUESTS * IMAGE_SIZE, 0));
+    CUDA_CHECK(cudaHostAlloc(&ctx->images_in, OUTSTANDING_REQUESTS * SQR(IMG_DIMENSION), 0));
+    CUDA_CHECK(cudaHostAlloc(&ctx->images_out, OUTSTANDING_REQUESTS * SQR(IMG_DIMENSION), 0));
     ctx->requests = (rpc_request *)calloc(OUTSTANDING_REQUESTS, sizeof(rpc_request));
+
+    // memory allocation for queues mode
+    const int IMAGE_SIZE = SQR(IMG_DIMENSION);
+    ctx->slotSize2CPU = IMAGE_SIZE;
 
     ctx->numberOfThreadBlocks = numOfThreadBlocksCalc();
 
-    CUDA_CHECK(cudaHostAlloc(&ctx->cpu2gpuQ, ctx->numberOfThreadBlocks * Q_SLOTS * IMAGE_SIZE, 0));
-    CUDA_CHECK(cudaHostAlloc(&ctx->gpu2cpuQ, ctx->numberOfThreadBlocks * Q_SLOTS * IMAGE_SIZE, 0));
+    ctx->slotSize2GPU = (1 + IMAGE_SIZE);
 
-    CUDA_CHECK(cudaHostAlloc(&ctx->producer, ctx->numberOfThreadBlocks * sizeof(int), 0));
-    CUDA_CHECK(cudaHostAlloc(&ctx->consumer, ctx->numberOfThreadBlocks * sizeof(int), 0));
-    /* TODO take CPU-GPU stream allocation code from hw2 */
+    ctx->cpu2gpuQueueSize = ctx->numberOfThreadBlocks * Q_SLOTS * ctx->slotSize2GPU;
+    CUDA_CHECK(cudaHostAlloc(&(ctx->cpu2gpuQueueCPU), ctx->cpu2gpuQueueSize, 0));
+
+    ctx->gpu2cpuQueueSize = ctx->numberOfThreadBlocks * Q_SLOTS * IMAGE_SIZE;
+    CUDA_CHECK(cudaHostAlloc(&(ctx->gpu2cpuQueueCPU), ctx->gpu2cpuQueueSize, 0));
+
+    ctx->producerIndexSize = ctx->numberOfThreadBlocks * sizeof(int);
+    CUDA_CHECK(cudaHostAlloc(&(ctx->producerIndexCPU), ctx->producerIndexSize, 0));
+
+    ctx->consumerIndexSize = ctx->numberOfThreadBlocks * sizeof(int);
+    CUDA_CHECK(cudaHostAlloc(&(ctx->consumerIndexCPU), ctx->consumerIndexSize, 0));
+
+    CUDA_CHECK(cudaHostGetDevicePointer(&(ctx->cpu2gpuQueueGPU), cpu2gpuQueueCPU, 0));
+    CUDA_CHECK(cudaHostGetDevicePointer(&(ctx->gpu2cpuQueueGPU), gpu2cpuQueueCPU, 0));
+    CUDA_CHECK(cudaHostGetDevicePointer(&(ctx->producerIndexGPU), producerIndexCPU, 0));
+    CUDA_CHECK(cudaHostGetDevicePointer(&(ctx->consumerIndexGPU), consumerIndexCPU, 0));
+
+    //memset memory regions
+    memset(ctx->producerIndexCPU, 0, ctx->producerIndexSize);
+    memset(ctx->consumerIndexCPU, 0, ctx->consumerIndexSize);
+    memset(ctx->cpu2gpuQueueCPU, 0, ctx->cpu2gpuQueueSize);
+    memset(ctx->gpu2cpuQueueCPU, 0, ctx->gpu2cpuQueueSize);
+
 }
 
 void tcp_connection(server_context *ctx)
@@ -329,8 +352,6 @@ void initialize_verbs(server_context *ctx)
         exit(1);
     }
 
-    const int IMAGE_SIZE = SQR(IMG_DIMENSION);
-
     /* allocate a memory region for the RPC requests. */
     ctx->mr_requests = ibv_reg_mr(ctx->pd, ctx->requests, sizeof(rpc_request) * OUTSTANDING_REQUESTS, IBV_ACCESS_LOCAL_WRITE);
     if (!ctx->mr_requests) {
@@ -339,48 +360,46 @@ void initialize_verbs(server_context *ctx)
     }
 
     /* register a memory region for the input / output images. */
-    ctx->mr_images_in = ibv_reg_mr(ctx->pd, ctx->images_in, OUTSTANDING_REQUESTS * IMAGE_SIZE, IBV_ACCESS_LOCAL_WRITE);
+    ctx->mr_images_in = ibv_reg_mr(ctx->pd, ctx->images_in, OUTSTANDING_REQUESTS * SQR(IMG_DIMENSION), IBV_ACCESS_LOCAL_WRITE);
     if (!ctx->mr_images_in) {
         printf("ibv_reg_mr() failed for input images\n");
         exit(1);
     }
 
     /* register a memory region for the input / output images. */
-    ctx->mr_images_out = ibv_reg_mr(ctx->pd, ctx->images_out, OUTSTANDING_REQUESTS * IMAGE_SIZE, IBV_ACCESS_LOCAL_WRITE);
+    ctx->mr_images_out = ibv_reg_mr(ctx->pd, ctx->images_out, OUTSTANDING_REQUESTS * SQR(IMG_DIMENSION), IBV_ACCESS_LOCAL_WRITE);
     if (!ctx->mr_images_out) {
         printf("ibv_reg_mr() failed for output images\n");
         exit(1);
     }
 
-    /* register a memory region for the cpu2gpu queue should be available for RDMA WRITE. */
-    ctx->mr_cpu2gpuQ = ibv_reg_mr(ctx->pd, ctx->cpu2gpuQ, ctx->numberOfThreadBlocks * Q_SLOTS * IMAGE_SIZE, IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_WRITE);
-    if (!ctx->mr_cpu2gpuQ) {
+    /* register a memory region for the CPU to GPU Queue*/
+    ctx->mr_cpu2gpuQueueCPU = ibv_reg_mr(ctx->pd, ctx->cpu2gpuQueueCPU, ctx->cpu2gpuQueueSize, IBV_ACCESS_REMOTE_READ | IBV_ACCESS_REMOTE_WRITE);
+    if (!ctx->mr_cpu2gpuQueueCPU) {
         printf("ibv_reg_mr() failed for CPU to GPU Queue\n");
         exit(1);
     }
 
-    /* register a memory region for the gpu2cpu queue should be available for RDMA READ. */
-    ctx->mr_gpu2cpuQ = ibv_reg_mr(ctx->pd, ctx->gpu2cpuQ, ctx->numberOfThreadBlocks * Q_SLOTS * IMAGE_SIZE, IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ);
-    if (!ctx->mr_cpu2gpuQ) {
+    /* register a memory region for the GPU to CPU Queue*/
+    ctx->mr_gpu2cpuQueueCPU = ibv_reg_mr(ctx->pd, ctx->gpu2cpuQueueCPU, ctx->gpu2cpuQueueSize, IBV_ACCESS_REMOTE_READ | IBV_ACCESS_REMOTE_WRITE);
+    if (!ctx->mr_gpu2cpuQueueCPU) {
         printf("ibv_reg_mr() failed for GPU to CPU Queue\n");
         exit(1);
     }
 
-    /* register a memory region for the producer index RDMA WRITE and READ. */
-    ctx->mr_producer = ibv_reg_mr(ctx->pd, ctx->producer, ctx->numberOfThreadBlocks * sizeof(int), IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_WRITE | IBV_ACCESS_REMOTE_READ);
-    if (!ctx->mr_cpu2gpuQ) {
-        printf("ibv_reg_mr() failed for producer\n");
+    /* register a memory region for for producer Index*/
+    ctx->mr_producerIndexCPU = ibv_reg_mr(ctx->pd, ctx->producerIndexCPU, ctx->producerIndexSize, IBV_ACCESS_REMOTE_READ | IBV_ACCESS_REMOTE_WRITE);
+    if (!ctx->mr_producerIndexCPU) {
+        printf("ibv_reg_mr() failed for producer Index\n");
         exit(1);
     }
 
-    /* register a memory region for the consumer index RDMA WRITE and READ. */
-    ctx->mr_consumer = ibv_reg_mr(ctx->pd, ctx->consumer, ctx->numberOfThreadBlocks * sizeof(int), IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_WRITE | IBV_ACCESS_REMOTE_READ);
-    if (!ctx->mr_cpu2gpuQ) {
-        printf("ibv_reg_mr() failed for consumer\n");
+    /* register a memory region for for consumer Index*/
+    ctx->mr_consumerIndexCPU = ibv_reg_mr(ctx->pd, ctx->consumerIndexCPU, ctx->consumerIndexSize, IBV_ACCESS_REMOTE_READ | IBV_ACCESS_REMOTE_WRITE);
+    if (!ctx->mr_consumerIndexCPU) {
+        printf("ibv_reg_mr() failed for consumer Index\n");
         exit(1);
     }
-
-    /* TODO register additional memory regions for CPU-GPU queues */
 
     /* create completion queue (CQ). We'll use same CQ for both send and receive parts of the QP */
     ctx->cq = ibv_create_cq(ctx->context, 2 * OUTSTANDING_REQUESTS, NULL, NULL, 0); /* create a CQ with place for two completions per request */
@@ -425,18 +444,19 @@ void exchange_parameters(server_context *ctx, ib_info_t *client_info)
     struct ib_info_t my_info;
     my_info.lid = port_attr.lid;
     my_info.qpn = ctx->qp->qp_num;
+    my_info.cpu2gpuQueue = ctx->cpu2gpuQueueCPU;
+    my_info.gpu2cpuQueue = ctx->gpu2cpuQueueCPU;
+    my_info.producerIndex = ctx->producerIndexCPU;
+    my_info.consumerIndex = ctx->consumerIndexCPU;
+    my_info.rkey_cpu2gpuQueue = ctx->mr_cpu2gpuQueueCPU->rkey;
+    my_info.rkey_gpu2cpuQueue = ctx->mr_gpu2cpuQueueCPU->rkey;
+    my_info.rkey_producerIndex = ctx->mr_producerIndexCPU->rkey;
+    my_info.rkey_consumerIndex = ctx->mr_consumerIndexCPU->rkey
+    my_info.numberOfSlots = Q_SLOTS;
+    my_info.numberOfThreadBlocks = ctx->numberOfThreadBlocks;
+    my_info.slotSize2GPU = ctx->slotSize2GPU;
+    my_info.slotSize2CPU = ctx->slotSize2CPU;
 
-    my_info.cpu2gpuQ = (uint64_t*)ctx->cpu2gpuQ;
-    my_info.gpu2cpuQ = (uint64_t*)ctx->gpu2cpuQ;
-    my_info.producer = (uint64_t*)ctx->producer;
-    my_info.consumer = (uint64_t*)ctx->consumer;
-
-    my_info.cpu2gpuQ_rkey = (int)ctx->mr_cpu2gpuQ->rkey;
-    my_info.gpu2cpuQ_rkey = (int)ctx->mr_gpu2cpuQ->rkey;
-    my_info.producer_rkey = (int)ctx->mr_producer->rkey;
-    my_info.consumer_rkey = (int)ctx->mr_consumer->rkey;
-
-    /* TODO add additional server rkeys / addresses here if needed */
 
     ret = send(ctx->socket_fd, &my_info, sizeof(struct ib_info_t), 0);
     if (ret < 0) {
@@ -594,6 +614,7 @@ void event_loop(server_context *ctx)
             sgl.addr = (uintptr_t)img_in;
             sgl.length = req->input_length;
             sgl.lkey = ctx->mr_images_in->lkey;
+
             send_wr.sg_list = &sgl;
             send_wr.num_sge = 1;
             send_wr.opcode = IBV_WR_RDMA_READ;
@@ -639,8 +660,8 @@ void event_loop(server_context *ctx)
         case IBV_WC_RDMA_WRITE:
             /* Completed RDMA Write - reuse buffers for receiving the next requests */
             post_recv(ctx, wc.wr_id);
-
             break;
+
         default:
             printf("Unexpected completion\n");
             assert(false);
@@ -651,24 +672,15 @@ void event_loop(server_context *ctx)
 void teardown_context(server_context *ctx)
 {
     /* cleanup */
-
     ibv_destroy_qp(ctx->qp);
     ibv_destroy_cq(ctx->cq);
     ibv_dereg_mr(ctx->mr_requests);
     ibv_dereg_mr(ctx->mr_images_in);
     ibv_dereg_mr(ctx->mr_images_out);
-
-    ibv_dereg_mr(ctx->mr_consumer);
-    ibv_dereg_mr(ctx->mr_producer);
-    ibv_dereg_mr(ctx->mr_gpu2cpuQ);
-    ibv_dereg_mr(ctx->mr_cpu2gpuQ);
-
-    /* TODO destroy the additional server MRs here if needed */
-    CUDA_CHECK(cudaFreeHost(ctx->gpu2cpuQ));
-    CUDA_CHECK(cudaFreeHost(ctx->cpu2gpuQ));
-    CUDA_CHECK(cudaFreeHost(ctx->producer));
-    CUDA_CHECK(cudaFreeHost(ctx->consumer));
-
+    ibv_dereg_mr(ctx->mr_cpu2gpuQueueCPU);
+    ibv_dereg_mr(ctx->mr_gpu2cpuQueueCPU);
+    ibv_dereg_mr(ctx->mr_producerIndexCPU);
+    ibv_dereg_mr(ctx->mr_consumerIndexCPU);
     ibv_dealloc_pd(ctx->pd);
     ibv_close_device(ctx->context);
 }
@@ -699,38 +711,7 @@ int main(int argc, char *argv[]) {
     connect_qp(&ctx, &client_info);
 
     if (ctx.mode == MODE_QUEUE) {
-        uchar *cpu2gpuQ_GPU_POINTER, *gpu2cpuQ_GPU_POINTER;
-
-        CUDA_CHECK(cudaHostGetDevicePointer(&cpu2gpuQ_GPU_POINTER, ctx.cpu2gpuQ, 0));
-        CUDA_CHECK(cudaHostGetDevicePointer(&gpu2cpuQ_GPU_POINTER, ctx.gpu2cpuQ, 0));
-
-        int *producer_GPU_POINTER, *consumer_GPU_POINTER;
-
-        CUDA_CHECK(cudaHostGetDevicePointer(&producer_GPU_POINTER, ctx.producer, 0));
-        CUDA_CHECK(cudaHostGetDevicePointer(&consumer_GPU_POINTER, ctx.consumer, 0));
-
-        gpu_server << < ctx.numberOfThreadBlocks, THREADS_PER_BLOCK >> >
-                                                  (producer_GPU_POINTER, consumer_GPU_POINTER, cpu2gpuQ_GPU_POINTER, gpu2cpuQ_GPU_POINTER);
-
-        /* TODO run the GPU persistent kernel from hw2, for 1024 threads per block */
-
-        while (ctx.producer[ctx.numberOfThreadBlocks - 1] != -1) {
-            /*step 1: poll for CQE */
-            struct ibv_wc wc;
-            int ncqes;
-            do {
-                ncqes = ibv_poll_cq(ctx.cq, 1, &wc);
-            } while (ncqes == 0);
-            if (ncqes < 0) {
-                printf("ERROR: ibv_poll_cq() failed\n");
-                exit(1);
-            }
-            if (wc.status != IBV_WC_SUCCESS) {
-                printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status), wc.status,
-                       __LINE__);
-                exit(1);
-            }
-        }
+        gpu_server <<< ctx->numberOfThreadBlocks, THREADS_PER_BLOCK >>>(producerIndexGPU, consumerIndexGPU, cpu2gpuQueueGPU, gpu2cpuQueueGPU);
     }
 
     /* now finally we get to the actual work, in the event loop */

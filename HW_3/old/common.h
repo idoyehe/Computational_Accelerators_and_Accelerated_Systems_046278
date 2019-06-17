@@ -4,15 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 ///////////////////////////////////////////////// DO NOT CHANGE ///////////////////////////////////////
 
 #define IMG_DIMENSION 32
 #define OUTSTANDING_REQUESTS 100
-#define Q_SLOTS 10
-#define INVALID -1
-#define INCREASE_PC_POINTER(X) ((X) + 1) % Q_SLOTS
+
 #define SQR(a) ((a) * (a))
 
 #ifdef __cplusplus
@@ -55,21 +52,16 @@ struct ib_info_t {
     int lid;
     int qpn;
 
-    uint64_t *cpu2gpuQ, *gpu2cpuQ; /* queues remote address*/
+    uchar *cpu2gpuQueue, *gpu2cpuQueue;
+    int *producerIndex, *consumerIndex;
 
-    int cpu2gpuQ_rkey, gpu2cpuQ_rkey; /* queues remote key*/
+    uint32_t rkey_cpu2gpuQueue, rkey_gpu2cpuQueue;
+    uint32_t rkey_producerIndex, rkey_consumerIndex;
 
-    uint64_t *producer, *consumer; /* producer and consumer index remote address */
-
-    int producer_rkey, consumer_rkey; /* queues remote key*/
-
+    int numberOfSlots;
     int numberOfThreadBlocks;
-
-
+    int slotSize2GPU, slotSize2CPU;
     /* TODO add additional server rkeys / addresses here if needed */
-
-    /* TODO communicate number of queues / blocks, other information needed to operate the GPU queues remotely */
-
 };
 
 enum mode_enum {

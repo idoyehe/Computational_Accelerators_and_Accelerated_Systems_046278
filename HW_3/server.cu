@@ -244,7 +244,6 @@ struct server_context {
 
     int *producer, *consumer; /* producer and consumer index */
 
-
     struct ibv_mr *mr_cpu2gpuQ; /* Memory region for CPU to GPU Queue */
     struct ibv_mr *mr_gpu2cpuQ; /* Memory region for GPU to CPU Queue */
 
@@ -263,7 +262,7 @@ void allocate_memory(server_context *ctx)
     CUDA_CHECK(cudaHostAlloc(&ctx->images_out, OUTSTANDING_REQUESTS * IMAGE_SIZE, 0));
     ctx->requests = (rpc_request *)calloc(OUTSTANDING_REQUESTS, sizeof(rpc_request));
 
-    ctx->numberOfThreadBlocks = numOfThreadBlocksCalc();
+    ctx->numberOfThreadBlocks = 1; //numOfThreadBlocksCalc();
 
     CUDA_CHECK(cudaHostAlloc(&ctx->cpu2gpuQ, ctx->numberOfThreadBlocks * Q_SLOTS * IMAGE_SIZE, 0));
     CUDA_CHECK(cudaHostAlloc(&ctx->gpu2cpuQ, ctx->numberOfThreadBlocks * Q_SLOTS * IMAGE_SIZE, 0));
@@ -426,10 +425,12 @@ void exchange_parameters(server_context *ctx, ib_info_t *client_info)
     my_info.lid = port_attr.lid;
     my_info.qpn = ctx->qp->qp_num;
 
-    my_info.cpu2gpuQ = (uint64_t*)ctx->cpu2gpuQ;
-    my_info.gpu2cpuQ = (uint64_t*)ctx->gpu2cpuQ;
-    my_info.producer = (uint64_t*)ctx->producer;
-    my_info.consumer = (uint64_t*)ctx->consumer;
+    my_info.numberOfThreadBlocks = ctx->numberOfThreadBlocks;
+
+    my_info.cpu2gpuQ = ctx->cpu2gpuQ;
+    my_info.gpu2cpuQ = ctx->gpu2cpuQ;
+    my_info.producer = ctx->producer;
+    my_info.consumer = ctx->consumer;
 
     my_info.cpu2gpuQ_rkey = (int)ctx->mr_cpu2gpuQ->rkey;
     my_info.gpu2cpuQ_rkey = (int)ctx->mr_gpu2cpuQ->rkey;
@@ -714,8 +715,7 @@ int main(int argc, char *argv[]) {
 
         /* TODO run the GPU persistent kernel from hw2, for 1024 threads per block */
 
-        while (ctx.producer[ctx.numberOfThreadBlocks - 1] != -1) {
-            /*step 1: poll for CQE */
+        while (ctx.producer[ctx.numberOfThreadBlocks - 1] != INVALID){
             struct ibv_wc wc;
             int ncqes;
             do {
@@ -726,8 +726,7 @@ int main(int argc, char *argv[]) {
                 exit(1);
             }
             if (wc.status != IBV_WC_SUCCESS) {
-                printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status), wc.status,
-                       __LINE__);
+                printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status), wc.status, __LINE__);
                 exit(1);
             }
         }

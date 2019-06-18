@@ -55,11 +55,11 @@ struct ib_info_t {
     int lid;
     int qpn;
 
-    uint64_t *cpu2gpuQ, *gpu2cpuQ; /* queues remote address*/
+    uchar *cpu2gpuQ, *gpu2cpuQ; /* queues remote address*/
 
     int cpu2gpuQ_rkey, gpu2cpuQ_rkey; /* queues remote key*/
 
-    uint64_t *producer, *consumer; /* producer and consumer index remote address */
+    int* producer, *consumer; /* producer and consumer index remote address */
 
     int producer_rkey, consumer_rkey; /* queues remote key*/
 

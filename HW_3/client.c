@@ -43,30 +43,6 @@ void process_image(uchar *img_in, uchar *img_out) {
     }
 }
 
-/* we'll use these to rate limit the request load */
-struct rate_limit_t {
-    double last_checked;
-    double lambda;
-    unsigned seed;
-};
-
-void rate_limit_init(struct rate_limit_t *rate_limit, double lambda, int seed) {
-    rate_limit->lambda = lambda;
-    rate_limit->seed = (seed == -1) ? 0 : seed;
-    rate_limit->last_checked = 0;
-}
-
-int rate_limit_can_send(struct rate_limit_t *rate_limit) {
-    if (rate_limit->lambda == 0) return 1;
-    double now = get_time_msec() * 1e-3;
-    double dt = now - rate_limit->last_checked;
-    double p = dt * rate_limit->lambda;
-    rate_limit->last_checked = now;
-    if (p > 1) p = 1;
-    double r = (double) rand_r(&rate_limit->seed) / RAND_MAX;
-    return (p > r);
-}
-
 double distance_sqr_between_image_arrays(uchar *img_arr1, uchar *img_arr2) {
     double distance_sqr = 0;
     for (int i = 0; i < NREQUESTS * SQR(IMG_DIMENSION); i++) {
@@ -111,9 +87,6 @@ struct client_context {
 
     struct ibv_mr *mr_producer_buffers; /* Memory region for producer index */
     struct ibv_mr *mr_consumer_buffers; /* Memory region for consumer index */
-
-
-    /* TODO add necessary context to track the client side of the GPU's producer/consumer queues */
 };
 
 int readProducerSlot(struct client_context *ctx, int threadBlock_i) {
@@ -308,7 +281,7 @@ slotToDequeue, int requestToDequeue, int *nextFetchedSlot, int image_size) {
 
 void
 enqueueJob(struct client_context *ctx, int threadBlock_i, int rquestToEnqueue, int image_size) {
-    int producer = readProducerSlot(ctx,threadBlock_i);
+    int producer = readProducerSlot(ctx, threadBlock_i);
 
     struct ibv_send_wr cpu2gpu_wr;
     struct ibv_send_wr *cpu2gpu_bad_wr;
@@ -351,13 +324,13 @@ enqueueJob(struct client_context *ctx, int threadBlock_i, int rquestToEnqueue, i
                wc.status, __LINE__);
         exit(1);
     }
-    writeProducerSlot(ctx,threadBlock_i, INCREASE_PC_POINTER(producer));
+    writeProducerSlot(ctx, threadBlock_i, INCREASE_PC_POINTER(producer));
     return;
 }
 
 void recordRequestPerSlot(struct client_context *ctx, int *requestPerTbSlot, int chosenThreadBlock,
                           int img_idx) {
-    int producer = readProducerSlot(ctx,chosenThreadBlock);
+    int producer = readProducerSlot(ctx, chosenThreadBlock);
     requestPerTbSlot[chosenThreadBlock * Q_SLOTS + producer] = img_idx;
 }
 
@@ -368,7 +341,7 @@ bool kernel_idle(struct client_context *ctx, int threadBlock_i) {
 }
 
 void stopKernel(struct client_context *ctx, int threadBlock_i) {
-    writeProducerSlot(ctx,threadBlock_i,INVALID);
+    writeProducerSlot(ctx, threadBlock_i, INVALID);
     return;
 }
 
@@ -652,14 +625,14 @@ void teardown_connection(struct client_context *ctx) {
     ibv_dealloc_pd(ctx->pd);
     ibv_close_device(ctx->context);
 
+    free(ctx->requests);
     free(ctx->images_in);
     free(ctx->images_out);
     free(ctx->images_out_from_gpu);
 }
 
 void allocate_and_register_memory(struct client_context *ctx) {
-    ctx->images_in = malloc(
-            NREQUESTS * SQR(IMG_DIMENSION)); /* we concatenate all images in one huge array */
+    ctx->images_in = malloc(NREQUESTS * SQR(IMG_DIMENSION)); /* we concatenate all images in one huge array */
     ctx->images_out = malloc(NREQUESTS * SQR(IMG_DIMENSION));
     ctx->images_out_from_gpu = malloc(NREQUESTS * SQR(IMG_DIMENSION));
     struct rpc_request *requests = calloc(1, sizeof(struct rpc_request));
@@ -721,8 +694,7 @@ void process_images(struct client_context *ctx) {
     printf("\n=== CPU ===\n");
     t_start = get_time_msec();
     for (int img_idx = 0; img_idx < NREQUESTS; ++img_idx)
-        process_image(&ctx->images_in[img_idx * SQR(IMG_DIMENSION)],
-                      &ctx->images_out[img_idx * SQR(IMG_DIMENSION)]);
+        process_image(&ctx->images_in[img_idx * SQR(IMG_DIMENSION)], &ctx->images_out[img_idx * SQR(IMG_DIMENSION)]);
     t_finish = get_time_msec();
     printf("throughput = %lf (req/sec)\n", NREQUESTS / (t_finish - t_start) * 1e+3);
 
@@ -744,12 +716,9 @@ void process_images(struct client_context *ctx) {
         int *nextFetchedSlot = (int *) malloc(ctx->server_info.numberOfThreadBlocks * sizeof(int));
 
         memset(nextFetchedSlot, 0, ctx->server_info.numberOfThreadBlocks * sizeof(int));
-        memset(requestPerTbSlot, INVALID,
-               ctx->server_info.numberOfThreadBlocks * Q_SLOTS * sizeof(int));
+        memset(requestPerTbSlot, INVALID, ctx->server_info.numberOfThreadBlocks * Q_SLOTS * sizeof(int));
 
         const int IMAGE_SIZE = SQR(IMG_DIMENSION);
-
-        /* TODO use the queues implementation from homework 2 using RDMA */
 
         for (int img_idx = 0; img_idx < NREQUESTS; ++img_idx) {
             //printf("Current request %d\n", img_idx);
@@ -765,12 +734,10 @@ void process_images(struct client_context *ctx) {
                         int *currentRequestPerTbSlot = requestPerTbSlot + (threadBlock_i * Q_SLOTS);
                         int requestToDequeue = currentRequestPerTbSlot[slotToDequeue];
 
-                        dequeueJob(ctx, threadBlock_i, slotToDequeue, requestToDequeue,
-                                nextFetchedSlot, IMAGE_SIZE);
+                        dequeueJob(ctx, threadBlock_i, slotToDequeue, requestToDequeue, nextFetchedSlot, IMAGE_SIZE);
                         currentRequestPerTbSlot[slotToDequeue] = INVALID;
                     }
-                    if (chosenThreadBlock == INVALID && !isCPU2GPU_Full(ctx,
-                                                                        threadBlock_i)) {
+                    if (chosenThreadBlock == INVALID && !isCPU2GPU_Full(ctx, threadBlock_i)) {
                         chosenThreadBlock = threadBlock_i;
                     }
                 }
@@ -778,17 +745,8 @@ void process_images(struct client_context *ctx) {
 
 
             recordRequestPerSlot(ctx, requestPerTbSlot, chosenThreadBlock, img_idx);
-
-            //TODO: requestPerTbSlot[chosenThreadBlock * Q_SLOTS + producerIndexCPU[chosenThreadBlock]] = img_idx;//save the request in the slot
             enqueueJob(ctx, chosenThreadBlock, img_idx, IMAGE_SIZE);
-
-            /* TODO check producer consumer queue for any responses.
-             * don't block. if no responses are there we'll check again in the next iteration
-             */
-
-            /* TODO push task to queue */
         }
-        /* TODO wait until you have responses for all requests */
 
         /* wait until you have responses for all requests and inform GPU to halt*/
         int all_done = false;
@@ -804,8 +762,7 @@ void process_images(struct client_context *ctx) {
                     int slotToDequeue = nextFetchedSlot[threadBlock_i];
                     int *currentRequestPerTbSlot = requestPerTbSlot + (threadBlock_i * Q_SLOTS);
                     int requestToDequeue = currentRequestPerTbSlot[slotToDequeue];
-                    dequeueJob(ctx, threadBlock_i, slotToDequeue, requestToDequeue,
-                               nextFetchedSlot, IMAGE_SIZE);
+                    dequeueJob(ctx, threadBlock_i, slotToDequeue, requestToDequeue, nextFetchedSlot, IMAGE_SIZE);
                     currentRequestPerTbSlot[slotToDequeue] = INVALID;
                 }
             }
@@ -821,8 +778,7 @@ void process_images(struct client_context *ctx) {
 
     double tf = get_time_msec();
 
-    double total_distance = distance_sqr_between_image_arrays(ctx->images_out,
-                                                              ctx->images_out_from_gpu);
+    double total_distance = distance_sqr_between_image_arrays(ctx->images_out, ctx->images_out_from_gpu);
     printf("distance from baseline %lf (should be zero)\n", total_distance);
     printf("throughput = %lf (req/sec)\n", NREQUESTS / (tf - ti) * 1e+3);
 }

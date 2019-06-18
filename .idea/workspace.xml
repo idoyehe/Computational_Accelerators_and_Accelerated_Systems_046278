@@ -8,6 +8,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="35120ce7-1503-4c4c-acbe-83c986712c4b" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HW_3/client.c" beforeDir="false" afterPath="$PROJECT_DIR$/HW_3/client.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HW_3/server.cu" beforeDir="false" afterPath="$PROJECT_DIR$/HW_3/server.cu" afterDir="false" />
     </list>
@@ -26,29 +27,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HW_3/client.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-12322">
-              <caret line="373" lean-forward="true" selection-start-line="373" selection-end-line="373" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/HW_3/server.cu">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="251">
-              <caret line="565" column="18" selection-start-line="565" selection-start-column="12" selection-end-line="565" selection-end-column="18" />
+            <state relative-caret-position="-1141">
+              <caret line="627" column="24" selection-start-line="627" selection-start-column="24" selection-end-line="627" selection-end-column="24" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/HW_3/out.txt">
+        <entry file="file://$PROJECT_DIR$/HW_3/server.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-40316">
-              <caret line="7" column="13" lean-forward="true" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+            <state relative-caret-position="-2764">
+              <caret line="253" column="5" selection-start-line="253" selection-start-column="5" selection-end-line="253" selection-end-column="5" />
             </state>
           </provider>
         </entry>
@@ -56,8 +48,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HW_3/common.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="129">
-              <caret line="53" column="16" selection-start-line="53" selection-start-column="7" selection-end-line="53" selection-end-column="16" />
+            <state relative-caret-position="-130">
+              <caret line="65" column="29" selection-start-line="65" selection-start-column="29" selection-end-line="65" selection-end-column="29" />
             </state>
           </provider>
         </entry>
@@ -73,9 +65,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>SHARED_MEM_PER_BLOCK</find>
-      <find>cpu2gpuQ</find>
-      <find>ctx-&gt;producer</find>
       <find>output_addr</find>
       <find>IMAGE_S</find>
       <find>img_out</find>
@@ -84,7 +73,6 @@
       <find>images_out_from_gpu</find>
       <find>server_i</find>
       <find>rate_limit</find>
-      <find>rate_limit_t</find>
       <find>rate_limit_can_send</find>
       <find>rate_limit_init</find>
       <find>_reg_</find>
@@ -103,6 +91,10 @@
       <find>numberOfThreadBlocks</find>
       <find>dequeueJob</find>
       <find>printf</find>
+      <find>THREADS_PER_BLOCK</find>
+      <find>rate_limit_t</find>
+      <find>requests</find>
+      <find>cpu2gpuQ</find>
     </findStrings>
     <replaceStrings>
       <replace>N_STREAMS</replace>
@@ -138,8 +130,8 @@
         <option value="$PROJECT_DIR$/HW_3/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/HW_2/ex2.cu" />
         <option value="$PROJECT_DIR$/HW_3/common.h" />
-        <option value="$PROJECT_DIR$/HW_3/client.c" />
         <option value="$PROJECT_DIR$/HW_3/server.cu" />
+        <option value="$PROJECT_DIR$/HW_3/client.c" />
       </list>
     </option>
   </component>
@@ -160,18 +152,17 @@
           <expand>
             <path>
               <item name="Computational_Accelerators_and_Accelerated_Systems_046278" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="~/CLionProjects/Computational_Accelerators_and_Accelerated_Systems_046278" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="C:\Users\IdoYe\CLionProjects\Computational_Accelerators_and_Accelerated_Systems_046278" type="442cc68d:ScopeViewTreeModel$RootNode" />
             </path>
             <path>
               <item name="Computational_Accelerators_and_Accelerated_Systems_046278" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="~/CLionProjects/Computational_Accelerators_and_Accelerated_Systems_046278" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="HW_3" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="C:\Users\IdoYe\CLionProjects\Computational_Accelerators_and_Accelerated_Systems_046278" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="HW_2" type="9f88c78c:ScopeViewTreeModel$FileNode" />
             </path>
             <path>
               <item name="Computational_Accelerators_and_Accelerated_Systems_046278" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="~/CLionProjects/Computational_Accelerators_and_Accelerated_Systems_046278" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="C:\Users\IdoYe\CLionProjects\Computational_Accelerators_and_Accelerated_Systems_046278" type="442cc68d:ScopeViewTreeModel$RootNode" />
               <item name="HW_3" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-              <item name="RDMA_WRITE" type="9f88c78c:ScopeViewTreeModel$FileNode" />
             </path>
           </expand>
           <select />
@@ -258,13 +249,6 @@
       <workItem from="1560759109563" duration="3833000" />
       <workItem from="1560781141882" duration="8057000" />
       <workItem from="1560842639139" duration="14057000" />
-    </task>
-    <task id="LOCAL-00013" summary="debug prefix_sum">
-      <created>1556816545766</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1556816545766</updated>
     </task>
     <task id="LOCAL-00014" summary="debug prefix_sum">
       <created>1556816840065</created>
@@ -602,11 +586,18 @@
       <option name="project" value="LOCAL" />
       <updated>1560858541027</updated>
     </task>
-    <option name="localTasksCounter" value="62" />
+    <task id="LOCAL-00062" summary="removing all TODOs">
+      <created>1560875766935</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1560875766935</updated>
+    </task>
+    <option name="localTasksCounter" value="63" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="148006000" />
+    <option name="totallyTimeSpent" value="148766000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -618,10 +609,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1440" height="900" extended-state="0" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49838188" visible="true" weight="0.23891273" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49838188" visible="true" weight="0.17643923" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" sideWeight="0.5008104" side_tool="true" weight="0.1652452" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -630,12 +621,12 @@
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.055421688" />
+      <window_info anchor="bottom" id="TODO" order="6" visible="true" weight="0.22318527" />
       <window_info anchor="bottom" id="Database Changes" order="7" />
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.12784399" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.3493976" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" weight="0.32936078" />
-      <window_info anchor="bottom" id="CMake" order="11" weight="0.23855421" />
+      <window_info anchor="bottom" id="CMake" order="11" weight="0.19501625" />
       <window_info anchor="bottom" id="Messages" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -681,7 +672,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="seperating number of threads serial / bulk" />
     <MESSAGE value="update dry part" />
     <MESSAGE value="freeing host memory" />
     <MESSAGE value="adding submission ZIP" />
@@ -706,7 +696,8 @@
     <MESSAGE value="HW_2 minor refactoring for HW_3" />
     <MESSAGE value="HW_3 dont work for 50 request" />
     <MESSAGE value="HW_3 fix bugs" />
-    <option name="LAST_COMMIT_MESSAGE" value="HW_3 fix bugs" />
+    <MESSAGE value="removing all TODOs" />
+    <option name="LAST_COMMIT_MESSAGE" value="removing all TODOs" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt" />
@@ -756,13 +747,7 @@
     <entry file="file://$PROJECT_DIR$/HW_3/Makefile">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/HW_3/RDMA_WRITE/server.cu">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="341">
-          <caret line="239" column="60" lean-forward="true" selection-start-line="239" selection-start-column="60" selection-end-line="239" selection-end-column="110" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/HW_3/RDMA_WRITE/server.cu" />
     <entry file="file://$PROJECT_DIR$/HW_2/ex2.cu">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="436">
@@ -770,45 +755,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HW_3/RDMA_WRITE/client.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="578">
-          <caret line="453" column="61" selection-start-line="453" selection-start-column="55" selection-end-line="453" selection-end-column="61" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HW_3/RDMA_WRITE/common.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="365">
-          <caret line="54" column="9" selection-start-line="54" selection-start-column="9" selection-end-line="54" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/HW_3/RDMA_WRITE/client.c" />
+    <entry file="file://$PROJECT_DIR$/HW_3/RDMA_WRITE/common.h" />
+    <entry file="file://$PROJECT_DIR$/HW_3/out.txt" />
     <entry file="file://$PROJECT_DIR$/HW_3/common.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="129">
-          <caret line="53" column="16" selection-start-line="53" selection-start-column="7" selection-end-line="53" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HW_3/out.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-40316">
-          <caret line="7" column="13" lean-forward="true" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HW_3/client.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-12322">
-          <caret line="373" lean-forward="true" selection-start-line="373" selection-end-line="373" />
+        <state relative-caret-position="-130">
+          <caret line="65" column="29" selection-start-line="65" selection-start-column="29" selection-end-line="65" selection-end-column="29" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/HW_3/server.cu">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="251">
-          <caret line="565" column="18" selection-start-line="565" selection-start-column="12" selection-end-line="565" selection-end-column="18" />
+        <state relative-caret-position="-2764">
+          <caret line="253" column="5" selection-start-line="253" selection-start-column="5" selection-end-line="253" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HW_3/client.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1141">
+          <caret line="627" column="24" selection-start-line="627" selection-start-column="24" selection-end-line="627" selection-end-column="24" />
         </state>
       </provider>
     </entry>

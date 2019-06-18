@@ -64,12 +64,6 @@ struct ib_info_t {
     int producer_rkey, consumer_rkey; /* queues remote key*/
 
     int numberOfThreadBlocks;
-
-
-    /* TODO add additional server rkeys / addresses here if needed */
-
-    /* TODO communicate number of queues / blocks, other information needed to operate the GPU queues remotely */
-
 };
 
 enum mode_enum {

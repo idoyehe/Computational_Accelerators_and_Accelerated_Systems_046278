@@ -9,8 +9,6 @@
   <component name="ChangeListManager">
     <list default="true" id="35120ce7-1503-4c4c-acbe-83c986712c4b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HW_3/client.c" beforeDir="false" afterPath="$PROJECT_DIR$/HW_3/client.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HW_3/server.cu" beforeDir="false" afterPath="$PROJECT_DIR$/HW_3/server.cu" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -27,7 +25,7 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HW_3/client.c">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="-1141">
@@ -36,11 +34,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HW_3/server.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2764">
-              <caret line="253" column="5" selection-start-line="253" selection-start-column="5" selection-end-line="253" selection-end-column="5" />
+            <state relative-caret-position="-137">
+              <caret line="709" lean-forward="true" selection-start-line="709" selection-end-line="709" />
             </state>
           </provider>
         </entry>
@@ -114,7 +112,7 @@
     </replaceStrings>
   </component>
   <component name="Git.Settings">
-    <option name="UPDATE_TYPE" value="REBASE" />
+    <option name="UPDATE_TYPE" value="MERGE" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="IdeDocumentHistory">
@@ -130,8 +128,8 @@
         <option value="$PROJECT_DIR$/HW_3/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/HW_2/ex2.cu" />
         <option value="$PROJECT_DIR$/HW_3/common.h" />
-        <option value="$PROJECT_DIR$/HW_3/server.cu" />
         <option value="$PROJECT_DIR$/HW_3/client.c" />
+        <option value="$PROJECT_DIR$/HW_3/server.cu" />
       </list>
     </option>
   </component>
@@ -249,20 +247,6 @@
       <workItem from="1560759109563" duration="3833000" />
       <workItem from="1560781141882" duration="8057000" />
       <workItem from="1560842639139" duration="14057000" />
-    </task>
-    <task id="LOCAL-00014" summary="debug prefix_sum">
-      <created>1556816840065</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1556816840065</updated>
-    </task>
-    <task id="LOCAL-00015" summary="debug prefix_sum">
-      <created>1556817152524</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1556817152524</updated>
     </task>
     <task id="LOCAL-00016" summary="debug prefix_sum">
       <created>1556817305817</created>
@@ -593,11 +577,25 @@
       <option name="project" value="LOCAL" />
       <updated>1560875766935</updated>
     </task>
-    <option name="localTasksCounter" value="63" />
+    <task id="LOCAL-00063" summary="removing all TODOs">
+      <created>1560876109783</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1560876109791</updated>
+    </task>
+    <task id="LOCAL-00064" summary="removing all TODOs">
+      <created>1560876396226</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1560876396226</updated>
+    </task>
+    <option name="localTasksCounter" value="65" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="148766000" />
+    <option name="totallyTimeSpent" value="149242000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -765,17 +763,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HW_3/server.cu">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2764">
-          <caret line="253" column="5" selection-start-line="253" selection-start-column="5" selection-end-line="253" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/HW_3/client.c">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1141">
           <caret line="627" column="24" selection-start-line="627" selection-start-column="24" selection-end-line="627" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HW_3/server.cu">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-137">
+          <caret line="709" lean-forward="true" selection-start-line="709" selection-end-line="709" />
         </state>
       </provider>
     </entry>

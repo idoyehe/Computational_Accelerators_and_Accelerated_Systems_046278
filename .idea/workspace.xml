@@ -8,7 +8,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="35120ce7-1503-4c4c-acbe-83c986712c4b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HW_3/client.c" beforeDir="false" afterPath="$PROJECT_DIR$/HW_3/client.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HW_3/server.cu" beforeDir="false" afterPath="$PROJECT_DIR$/HW_3/server.cu" afterDir="false" />
     </list>
@@ -30,8 +29,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HW_3/client.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="10" column="23" selection-start-line="10" selection-start-column="23" selection-end-line="10" selection-end-column="23" />
+            <state relative-caret-position="-12322">
+              <caret line="373" lean-forward="true" selection-start-line="373" selection-end-line="373" />
             </state>
           </provider>
         </entry>
@@ -39,8 +38,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HW_3/server.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="241">
-              <caret line="715" column="85" selection-start-line="715" selection-start-column="85" selection-end-line="715" selection-end-column="85" />
+            <state relative-caret-position="251">
+              <caret line="565" column="18" selection-start-line="565" selection-start-column="12" selection-end-line="565" selection-end-column="18" />
             </state>
           </provider>
         </entry>
@@ -101,9 +100,9 @@
       <find>consumer RDMA READ from need_to_fetch</find>
       <find>producer</find>
       <find>server got WCQ</find>
-      <find>printf</find>
-      <find>dequeueJob</find>
       <find>numberOfThreadBlocks</find>
+      <find>dequeueJob</find>
+      <find>printf</find>
     </findStrings>
     <replaceStrings>
       <replace>N_STREAMS</replace>
@@ -119,6 +118,7 @@
       <replace>INCREASE_PC_POINTER</replace>
       <replace>nextFetchedSlot</replace>
       <replace>need_to_fetch</replace>
+      <replace>//printf</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -257,14 +257,7 @@
       <workItem from="1560714377190" duration="1147000" />
       <workItem from="1560759109563" duration="3833000" />
       <workItem from="1560781141882" duration="8057000" />
-      <workItem from="1560842639139" duration="12196000" />
-    </task>
-    <task id="LOCAL-00012" summary="debug prefix_sum">
-      <created>1556816459722</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1556816459722</updated>
+      <workItem from="1560842639139" duration="14057000" />
     </task>
     <task id="LOCAL-00013" summary="debug prefix_sum">
       <created>1556816545766</created>
@@ -602,11 +595,18 @@
       <option name="project" value="LOCAL" />
       <updated>1560856953430</updated>
     </task>
-    <option name="localTasksCounter" value="61" />
+    <task id="LOCAL-00061" summary="HW_3 fix bugs">
+      <created>1560858541027</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1560858541027</updated>
+    </task>
+    <option name="localTasksCounter" value="62" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="146145000" />
+    <option name="totallyTimeSpent" value="148006000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -681,7 +681,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="add free gpu memory" />
     <MESSAGE value="seperating number of threads serial / bulk" />
     <MESSAGE value="update dry part" />
     <MESSAGE value="freeing host memory" />
@@ -706,7 +705,8 @@
     <MESSAGE value="HW_2 minor refactoring" />
     <MESSAGE value="HW_2 minor refactoring for HW_3" />
     <MESSAGE value="HW_3 dont work for 50 request" />
-    <option name="LAST_COMMIT_MESSAGE" value="HW_3 dont work for 50 request" />
+    <MESSAGE value="HW_3 fix bugs" />
+    <option name="LAST_COMMIT_MESSAGE" value="HW_3 fix bugs" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt" />
@@ -800,15 +800,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/HW_3/client.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="10" column="23" selection-start-line="10" selection-start-column="23" selection-end-line="10" selection-end-column="23" />
+        <state relative-caret-position="-12322">
+          <caret line="373" lean-forward="true" selection-start-line="373" selection-end-line="373" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/HW_3/server.cu">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="241">
-          <caret line="715" column="85" selection-start-line="715" selection-start-column="85" selection-end-line="715" selection-end-column="85" />
+        <state relative-caret-position="251">
+          <caret line="565" column="18" selection-start-line="565" selection-start-column="12" selection-end-line="565" selection-end-column="18" />
         </state>
       </provider>
     </entry>

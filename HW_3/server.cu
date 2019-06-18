@@ -710,8 +710,8 @@ int main(int argc, char *argv[]) {
         CUDA_CHECK(cudaHostGetDevicePointer(&producer_GPU_POINTER, ctx.producer, 0));
         CUDA_CHECK(cudaHostGetDevicePointer(&consumer_GPU_POINTER, ctx.consumer, 0));
 
-        gpu_server << < ctx.numberOfThreadBlocks, THREADS_PER_BLOCK >> >
-                                                  (producer_GPU_POINTER, consumer_GPU_POINTER, cpu2gpuQ_GPU_POINTER, gpu2cpuQ_GPU_POINTER);
+        gpu_server <<< ctx.numberOfThreadBlocks, THREADS_PER_BLOCK >>> (producer_GPU_POINTER,
+                consumer_GPU_POINTER, cpu2gpuQ_GPU_POINTER, gpu2cpuQ_GPU_POINTER);
 
         /* TODO run the GPU persistent kernel from hw2, for 1024 threads per block */
     }

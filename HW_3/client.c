@@ -116,10 +116,14 @@ struct client_context {
     /* TODO add necessary context to track the client side of the GPU's producer/consumer queues */
 };
 
-bool isCPU2GPU_Full(struct client_context *ctx, int threadBlock_i) {
+int readProducerSlot(struct client_context *ctx, int threadBlock_i) {
     struct ibv_send_wr producer_wr;
     struct ibv_send_wr *producer_bad_wr;
     struct ibv_sge producer_sgl;
+    struct ibv_wc wc;
+    int ncqes;
+
+    ctx->producer_buffers = INVALID;
 
     /* send RDMA Read to client to read the producer */
     memset(&producer_wr, 0, sizeof(struct ibv_send_wr));
@@ -137,12 +141,100 @@ bool isCPU2GPU_Full(struct client_context *ctx, int threadBlock_i) {
     producer_wr.wr.rdma.rkey = ctx->server_info.producer_rkey;
 
     if (ibv_post_send(ctx->qp, &producer_wr, &producer_bad_wr)) {
+        printf("ERROR: ibv_post_send() for producer RDMA read failed\n");
+        exit(1);
+    }
+
+    do {
+        ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
+    } while (ncqes == 0);
+    if (ncqes < 0) {
+        printf("ERROR: ibv_poll_cq() for producer RDMA read failed\n");
+        exit(1);
+    }
+    if (wc.status != IBV_WC_SUCCESS) {
+        printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status),
+               wc.status, __LINE__);
+        exit(1);
+    }
+    assert(ctx->producer_buffers != -1);
+    return ctx->producer_buffers;
+}
+
+int readConsumerSlot(struct client_context *ctx, int threadBlock_i) {
+    struct ibv_send_wr consumer_wr;
+    struct ibv_send_wr *consumer_bad_wr;
+    struct ibv_sge consumer_sgl;
+    struct ibv_wc wc;
+    int ncqes;
+
+    ctx->consumer_buffers = INVALID;
+
+    /* send RDMA Read to client to read the consumer */
+    memset(&consumer_wr, 0, sizeof(struct ibv_send_wr));
+    consumer_wr.wr_id = 0;
+    consumer_sgl.addr = (uintptr_t) & (ctx->consumer_buffers);
+    consumer_sgl.length = sizeof(int);
+    consumer_sgl.lkey = ctx->mr_consumer_buffers->lkey;
+
+    consumer_wr.sg_list = &consumer_sgl;
+    consumer_wr.num_sge = 1;
+    consumer_wr.opcode = IBV_WR_RDMA_READ;
+    consumer_wr.send_flags = IBV_SEND_SIGNALED;
+    consumer_wr.wr.rdma.remote_addr = (uint64_t)(ctx->server_info.consumer +
+                                                 threadBlock_i);
+    consumer_wr.wr.rdma.rkey = ctx->server_info.consumer_rkey;
+
+    if (ibv_post_send(ctx->qp, &consumer_wr, &consumer_bad_wr)) {
+        printf("ERROR: ibv_post_send() for consumer RDMA read failed\n");
+        exit(1);
+    }
+
+    do {
+        ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
+    } while (ncqes == 0);
+    if (ncqes < 0) {
+        printf("ERROR: ibv_poll_cq() for consumer RDMA read failed\n");
+        exit(1);
+    }
+    if (wc.status != IBV_WC_SUCCESS) {
+        printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status),
+               wc.status, __LINE__);
+        exit(1);
+    }
+    assert(ctx->consumer_buffers != -1);
+    return ctx->consumer_buffers;
+}
+
+void writeProducerSlot(struct client_context *ctx, int threadBlock_i, int newValue) {
+    struct ibv_send_wr producer_wr;
+    struct ibv_send_wr *producer_bad_wr;
+    struct ibv_sge producer_sgl;
+    struct ibv_wc wc;
+    int ncqes;
+
+    ctx->producer_buffers = newValue;
+
+    /* send RDMA WRITE to server to update the producer index */
+    memset(&producer_wr, 0, sizeof(struct ibv_send_wr));
+    producer_wr.wr_id = 2;
+    producer_sgl.addr = (uintptr_t) & (ctx->producer_buffers);
+    producer_sgl.length = sizeof(int);
+    producer_sgl.lkey = ctx->mr_producer_buffers->lkey;
+
+    producer_wr.sg_list = &producer_sgl;
+    producer_wr.num_sge = 1;
+    producer_wr.opcode = IBV_WR_RDMA_WRITE;
+    producer_wr.send_flags = IBV_SEND_SIGNALED;
+    producer_wr.wr.rdma.remote_addr = (uint64_t)(ctx->server_info.producer +
+                                                 threadBlock_i);
+    producer_wr.wr.rdma.rkey = ctx->server_info.producer_rkey;
+
+    if (ibv_post_send(ctx->qp, &producer_wr, &producer_bad_wr)) {
         printf("ERROR: ibv_post_send() for producer failed\n");
         exit(1);
     }
 
-    struct ibv_wc wc;
-    int ncqes;
     do {
         ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
     } while (ncqes == 0);
@@ -155,101 +247,26 @@ bool isCPU2GPU_Full(struct client_context *ctx, int threadBlock_i) {
                wc.status, __LINE__);
         exit(1);
     }
+}
 
-    struct ibv_send_wr consumer_wr;
-    struct ibv_send_wr *consumer_bad_wr;
-    struct ibv_sge consumer_sgl;
-
-    /* send RDMA Read to client to read the producer */
-    memset(&consumer_wr, 0, sizeof(struct ibv_send_wr));
-    consumer_wr.wr_id = 1;
-    consumer_sgl.addr = (uintptr_t) & (ctx->consumer_buffers);
-    consumer_sgl.length = sizeof(int);
-    consumer_sgl.lkey = ctx->mr_consumer_buffers->lkey;
-
-    consumer_wr.sg_list = &consumer_sgl;
-    consumer_wr.num_sge = 1;
-    consumer_wr.opcode = IBV_WR_RDMA_READ;
-    consumer_wr.send_flags = IBV_SEND_SIGNALED;
-    consumer_wr.wr.rdma.remote_addr = (uint64_t)(ctx->server_info.consumer +
-                                                 threadBlock_i);
-    consumer_wr.wr.rdma.rkey = ctx->server_info.consumer_rkey;
-
-    if (ibv_post_send(ctx->qp, &consumer_wr, &consumer_bad_wr)) {
-        printf("ERROR: ibv_post_send() for consumer failed\n");
-        exit(1);
-    }
-
-
-    do {
-        ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
-    } while (ncqes == 0);
-    if (ncqes < 0) {
-        printf("ERROR: ibv_poll_cq() failed\n");
-        exit(1);
-    }
-    if (wc.status != IBV_WC_SUCCESS) {
-        printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status),
-               wc.status, __LINE__);
-        exit(1);
-    }
-
-    return INCREASE_PC_POINTER(ctx->producer_buffers) == ctx->consumer_buffers;
+bool isCPU2GPU_Full(struct client_context *ctx, int threadBlock_i) {
+    int producer = readProducerSlot(ctx, threadBlock_i);
+    int consumer = readConsumerSlot(ctx, threadBlock_i);
+    return INCREASE_PC_POINTER(producer) == consumer;
 }
 
 bool need_to_fetch(struct client_context *ctx, int *nextFetchedSlot, int threadBlock_i) {
-    ctx->consumer_buffers = INVALID;
-    struct ibv_send_wr consumer_wr;
-    struct ibv_send_wr *consumer_bad_wr;
-    struct ibv_sge consumer_sgl;
-
-    /* send RDMA Read to client to read the producer */
-    memset(&consumer_wr, 0, sizeof(struct ibv_send_wr));
-    consumer_wr.wr_id = 1;
-    consumer_sgl.addr = (uintptr_t) & (ctx->consumer_buffers);
-    consumer_sgl.length = sizeof(int);
-    consumer_sgl.lkey = ctx->mr_consumer_buffers->lkey;
-
-    consumer_wr.sg_list = &consumer_sgl;
-    consumer_wr.num_sge = 1;
-    consumer_wr.opcode = IBV_WR_RDMA_READ;
-    consumer_wr.send_flags = IBV_SEND_SIGNALED;
-    consumer_wr.wr.rdma.remote_addr = (uint64_t)(ctx->server_info.consumer +
-                                                 threadBlock_i);
-    consumer_wr.wr.rdma.rkey = ctx->server_info.consumer_rkey;
-
-    if (ibv_post_send(ctx->qp, &consumer_wr, &consumer_bad_wr)) {
-        printf("ERROR: ibv_post_send() for consumer failed\n");
-        exit(1);
-    }
-
-    struct ibv_wc wc;
-    int ncqes;
-    do {
-        ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
-    } while (ncqes == 0);
-    if (ncqes < 0) {
-        printf("ERROR: ibv_poll_cq() failed\n");
-        exit(1);
-    }
-    if (wc.status != IBV_WC_SUCCESS) {
-        printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status),
-               wc.status, __LINE__);
-        exit(1);
-    }
-    printf("need_to_fetch:");
-    printf("Consumer slot index: %d of TB %d\n", ctx->consumer_buffers, threadBlock_i);
-
-    return nextFetchedSlot[threadBlock_i] != ctx->consumer_buffers;
+    int consumer = readConsumerSlot(ctx, threadBlock_i);
+    return nextFetchedSlot[threadBlock_i] != consumer;
 }
 
 void dequeueJob(struct client_context *ctx, int threadBlock_i, int
-slotToDequeue, int requestToDequeue, int image_size) {
+slotToDequeue, int requestToDequeue, int *nextFetchedSlot, int image_size) {
     struct ibv_send_wr gpu2cpu_wr;
     struct ibv_send_wr *gpu2cpu_bad_wr;
     struct ibv_sge gpu2cpu_sgl;
 
-    /* send RDMA Read to client to read the producer */
+    /* send RDMA Read to client to done image from GPU2CPU queue the producer */
     memset(&gpu2cpu_wr, 0, sizeof(struct ibv_send_wr));
     gpu2cpu_wr.wr_id = 0;
     gpu2cpu_sgl.addr = (uintptr_t)(ctx->images_out_from_gpu + (image_size *
@@ -285,62 +302,19 @@ slotToDequeue, int requestToDequeue, int image_size) {
                wc.status, __LINE__);
         exit(1);
     }
-    printf("dequeue_job:");
-    printf("slot to dequeue index: %d of TB %d, request %d\n", slotToDequeue, threadBlock_i,
-           requestToDequeue);
+    nextFetchedSlot[threadBlock_i] = INCREASE_PC_POINTER(slotToDequeue);
     return;
 }
 
 void
 enqueueJob(struct client_context *ctx, int threadBlock_i, int rquestToEnqueue, int image_size) {
-    struct ibv_send_wr producer_wr;
-    struct ibv_send_wr *producer_bad_wr;
-    struct ibv_sge producer_sgl;
-    struct ibv_wc wc;
-
-
-    /* send RDMA Read to client to read the producer */
-    ctx->producer_buffers = INVALID;
-
-    memset(&producer_wr, 0, sizeof(struct ibv_send_wr));
-    producer_wr.wr_id = 0;
-    producer_sgl.addr = (uintptr_t) & (ctx->producer_buffers);
-    producer_sgl.length = sizeof(int);
-    producer_sgl.lkey = ctx->mr_producer_buffers->lkey;
-
-    producer_wr.sg_list = &producer_sgl;
-    producer_wr.num_sge = 1;
-    producer_wr.opcode = IBV_WR_RDMA_READ;
-    producer_wr.send_flags = IBV_SEND_SIGNALED;
-    producer_wr.wr.rdma.remote_addr = (uint64_t)(ctx->server_info.producer +
-                                                 threadBlock_i);
-    producer_wr.wr.rdma.rkey = ctx->server_info.producer_rkey;
-
-    if (ibv_post_send(ctx->qp, &producer_wr, &producer_bad_wr)) {
-        printf("ERROR: ibv_post_send() for producer failed\n");
-        exit(1);
-    }
-
-    int ncqes;
-
-    do {
-        ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
-    } while (ncqes == 0);
-    if (ncqes < 0) {
-        printf("ERROR: ibv_poll_cq() failed\n");
-        exit(1);
-    }
-    if (wc.status != IBV_WC_SUCCESS) {
-        printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status),
-               wc.status, __LINE__);
-        exit(1);
-    }
-    printf("enqueueJob:");
-    printf("after RDMA read producer index: %d of TB %d\n", ctx->producer_buffers, threadBlock_i);
+    int producer = readProducerSlot(ctx,threadBlock_i);
 
     struct ibv_send_wr cpu2gpu_wr;
     struct ibv_send_wr *cpu2gpu_bad_wr;
     struct ibv_sge cpu2gpu_sgl;
+    struct ibv_wc wc;
+    int ncqes;
 
     memset(&cpu2gpu_wr, 0, sizeof(struct ibv_send_wr));
     cpu2gpu_wr.wr_id = 1;
@@ -355,7 +329,7 @@ enqueueJob(struct client_context *ctx, int threadBlock_i, int rquestToEnqueue, i
     cpu2gpu_wr.send_flags = IBV_SEND_SIGNALED;
     cpu2gpu_wr.wr.rdma.remote_addr = (uint64_t)(ctx->server_info.cpu2gpuQ +
                                                 ((threadBlock_i * Q_SLOTS +
-                                                  ctx->producer_buffers) * image_size));
+                                                  producer) * image_size));
     cpu2gpu_wr.wr.rdma.rkey = ctx->server_info.cpu2gpuQ_rkey;
     cpu2gpu_wr.imm_data = rquestToEnqueue;
 
@@ -365,51 +339,6 @@ enqueueJob(struct client_context *ctx, int threadBlock_i, int rquestToEnqueue, i
         exit(1);
     }
 
-    printf("enqueueJob:");
-    printf("after RDMA SEND WRITE to CPU2GPU Queue\n");
-
-    do {
-        ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
-    } while (ncqes == 0);
-    printf("enqueueJob:");
-    printf("after RDMA poll WRITE to CPU2GPU Queue\n");
-    if (ncqes < 0) {
-        printf("ERROR: ibv_poll_cq() failed\n");
-        exit(1);
-    }
-    if (wc.status != IBV_WC_SUCCESS) {
-        printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status),
-               wc.status, __LINE__);
-        exit(1);
-    }
-
-    printf("enqueueJob:");
-    printf("request %d enqueued to slot index: %d of TB %d\n", rquestToEnqueue,
-           ctx->producer_buffers, threadBlock_i);
-
-    ctx->producer_buffers = INCREASE_PC_POINTER(ctx->producer_buffers);
-
-    /* send RDMA WRITE to server to update the producer index */
-    memset(&producer_wr, 0, sizeof(struct ibv_send_wr));
-    producer_wr.wr_id = 2;
-    producer_sgl.addr = (uintptr_t) & (ctx->producer_buffers);
-    producer_sgl.length = sizeof(int);
-    producer_sgl.lkey = ctx->mr_producer_buffers->lkey;
-
-    producer_wr.sg_list = &producer_sgl;
-    producer_wr.num_sge = 1;
-    producer_wr.opcode = IBV_WR_RDMA_WRITE;
-    producer_wr.send_flags = IBV_SEND_SIGNALED;
-    producer_wr.wr.rdma.remote_addr = (uint64_t)(ctx->server_info.producer +
-                                                 threadBlock_i);
-    producer_wr.wr.rdma.rkey = ctx->server_info.producer_rkey;
-    producer_wr.imm_data = rquestToEnqueue;
-
-    if (ibv_post_send(ctx->qp, &producer_wr, &producer_bad_wr)) {
-        printf("ERROR: ibv_post_send() for producer failed\n");
-        exit(1);
-    }
-
     do {
         ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
     } while (ncqes == 0);
@@ -422,190 +351,24 @@ enqueueJob(struct client_context *ctx, int threadBlock_i, int rquestToEnqueue, i
                wc.status, __LINE__);
         exit(1);
     }
-
-    printf("enqueueJob:");
-    printf("new producer index: %d of TB %d, request\n", ctx->producer_buffers, threadBlock_i);
-
+    writeProducerSlot(ctx,threadBlock_i, INCREASE_PC_POINTER(producer));
     return;
 }
 
 void recordRequestPerSlot(struct client_context *ctx, int *requestPerTbSlot, int chosenThreadBlock,
                           int img_idx) {
-    printf("recordRequestPerSlot\n");
-    struct ibv_send_wr producer_wr;
-    struct ibv_send_wr *producer_bad_wr;
-    struct ibv_sge producer_sgl;
-
-    /* send RDMA Read to client to read the producer */
-    memset(&producer_wr, 0, sizeof(struct ibv_send_wr));
-    producer_wr.wr_id = 0;
-    producer_sgl.addr = (uintptr_t) & (ctx->producer_buffers);
-    producer_sgl.length = sizeof(int);
-    producer_sgl.lkey = ctx->mr_producer_buffers->lkey;
-
-    producer_wr.sg_list = &producer_sgl;
-    producer_wr.num_sge = 1;
-    producer_wr.opcode = IBV_WR_RDMA_READ;
-    producer_wr.send_flags = IBV_SEND_SIGNALED;
-    producer_wr.wr.rdma.remote_addr = (uint64_t)(ctx->server_info.producer +
-                                                 chosenThreadBlock);
-    producer_wr.wr.rdma.rkey = ctx->server_info.producer_rkey;
-
-    if (ibv_post_send(ctx->qp, &producer_wr, &producer_bad_wr)) {
-        printf("ERROR: ibv_post_send() for producer failed\n");
-        exit(1);
-    }
-
-    struct ibv_wc wc;
-    int ncqes;
-    do {
-        ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
-    } while (ncqes == 0);
-    if (ncqes < 0) {
-        printf("ERROR: ibv_poll_cq() failed\n");
-        exit(1);
-    }
-    if (wc.status != IBV_WC_SUCCESS) {
-        printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status),
-               wc.status, __LINE__);
-        exit(1);
-    }
-
-    requestPerTbSlot[chosenThreadBlock * Q_SLOTS + ctx->producer_buffers] = img_idx;
-
-    printf("recordRequestPerSlot:");
-    printf("recored request %d to slot index: %d of TB %d, request\n", img_idx,
-           ctx->producer_buffers, chosenThreadBlock);
+    int producer = readProducerSlot(ctx,chosenThreadBlock);
+    requestPerTbSlot[chosenThreadBlock * Q_SLOTS + producer] = img_idx;
 }
 
 bool kernel_idle(struct client_context *ctx, int threadBlock_i) {
-    struct ibv_send_wr producer_wr;
-    struct ibv_send_wr *producer_bad_wr;
-    struct ibv_sge producer_sgl;
-
-    /* send RDMA Read to client to read the producer */
-    memset(&producer_wr, 0, sizeof(struct ibv_send_wr));
-    producer_wr.wr_id = 0;
-    producer_sgl.addr = (uintptr_t) & (ctx->producer_buffers);
-    producer_sgl.length = sizeof(int);
-    producer_sgl.lkey = ctx->mr_producer_buffers->lkey;
-
-    producer_wr.sg_list = &producer_sgl;
-    producer_wr.num_sge = 1;
-    producer_wr.opcode = IBV_WR_RDMA_READ;
-    producer_wr.send_flags = IBV_SEND_SIGNALED;
-    producer_wr.wr.rdma.remote_addr = (uint64_t)(ctx->server_info.producer +
-                                                 threadBlock_i);
-    producer_wr.wr.rdma.rkey = ctx->server_info.producer_rkey;
-
-    if (ibv_post_send(ctx->qp, &producer_wr, &producer_bad_wr)) {
-        printf("ERROR: ibv_post_send() for producer failed\n");
-        exit(1);
-    }
-
-    struct ibv_wc wc;
-    int ncqes;
-    do {
-        ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
-    } while (ncqes == 0);
-    if (ncqes < 0) {
-        printf("ERROR: ibv_poll_cq() failed\n");
-        exit(1);
-    }
-    if (wc.status != IBV_WC_SUCCESS) {
-        printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status),
-               wc.status, __LINE__);
-        exit(1);
-    }
-
-    struct ibv_send_wr consumer_wr;
-    struct ibv_send_wr *consumer_bad_wr;
-    struct ibv_sge consumer_sgl;
-
-    /* send RDMA Read to client to read the producer */
-    memset(&consumer_wr, 0, sizeof(struct ibv_send_wr));
-    consumer_wr.wr_id = 1;
-    consumer_sgl.addr = (uintptr_t) & (ctx->consumer_buffers);
-    consumer_sgl.length = sizeof(int);
-    consumer_sgl.lkey = ctx->mr_consumer_buffers->lkey;
-
-    consumer_wr.sg_list = &consumer_sgl;
-    consumer_wr.num_sge = 1;
-    consumer_wr.opcode = IBV_WR_RDMA_READ;
-    consumer_wr.send_flags = IBV_SEND_SIGNALED;
-    consumer_wr.wr.rdma.remote_addr = (uint64_t)(ctx->server_info.consumer +
-                                                 threadBlock_i);
-    consumer_wr.wr.rdma.rkey = ctx->server_info.consumer_rkey;
-
-    if (ibv_post_send(ctx->qp, &consumer_wr, &consumer_bad_wr)) {
-        printf("ERROR: ibv_post_send() for consumer failed\n");
-        exit(1);
-    }
-
-    do {
-        ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
-    } while (ncqes == 0);
-    if (ncqes < 0) {
-        printf("ERROR: ibv_poll_cq() failed\n");
-        exit(1);
-    }
-    if (wc.status != IBV_WC_SUCCESS) {
-        printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status),
-               wc.status, __LINE__);
-        exit(1);
-    }
-
-    return ctx->producer_buffers == ctx->consumer_buffers;
+    int producer = readProducerSlot(ctx, threadBlock_i);
+    int consumer = readConsumerSlot(ctx, threadBlock_i);
+    return producer == consumer;
 }
 
 void stopKernel(struct client_context *ctx, int threadBlock_i) {
-    struct ibv_send_wr producer_wr;
-    struct ibv_send_wr *producer_bad_wr;
-    struct ibv_sge producer_sgl;
-
-    ctx->producer_buffers = INVALID;
-
-    /* send RDMA WRITE to server to update the producer index */
-    memset(&producer_wr, 0, sizeof(struct ibv_send_wr));
-    producer_wr.wr_id = 0;
-    producer_sgl.addr = (uintptr_t) & (ctx->producer_buffers);
-    producer_sgl.length = sizeof(int);
-    producer_sgl.lkey = ctx->mr_producer_buffers->lkey;
-
-    producer_wr.sg_list = &producer_sgl;
-    producer_wr.num_sge = 1;
-    producer_wr.opcode = IBV_WR_RDMA_WRITE;
-    producer_wr.send_flags = IBV_SEND_SIGNALED;
-    producer_wr.wr.rdma.remote_addr = (uint64_t)(ctx->server_info.producer +
-                                                 threadBlock_i);
-    producer_wr.wr.rdma.rkey = ctx->server_info.producer_rkey;
-
-    if (ibv_post_send(ctx->qp, &producer_wr, &producer_bad_wr)) {
-        printf("ERROR: ibv_post_send() for producer failed\n");
-        exit(1);
-    }
-
-    printf("stop kernels:");
-    printf("after RDMA send WRITE to stop kernel of %d\n",threadBlock_i);
-
-    struct ibv_wc wc;
-    int ncqes;
-
-    do {
-        ncqes = ibv_poll_cq(ctx->cq, 1, &wc);
-    } while (ncqes == 0);
-    if (ncqes < 0) {
-        printf("ERROR: ibv_poll_cq() failed\n");
-        exit(1);
-    }
-    if (wc.status != IBV_WC_SUCCESS) {
-        printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status),
-               wc.status, __LINE__);
-        exit(1);
-    }
-
-    printf("stop kernels:");
-    printf("after RDMA poll WRITE to stop kernel of %d\n",threadBlock_i);
+    writeProducerSlot(ctx,threadBlock_i,INVALID);
     return;
 }
 
@@ -989,23 +752,22 @@ void process_images(struct client_context *ctx) {
         /* TODO use the queues implementation from homework 2 using RDMA */
 
         for (int img_idx = 0; img_idx < NREQUESTS; ++img_idx) {
-            printf("Current request %d\n", img_idx);
+            //printf("Current request %d\n", img_idx);
             int chosenThreadBlock = INVALID;
             while (chosenThreadBlock == INVALID) {
                 for (int threadBlock_i = 0;
                      threadBlock_i < ctx->server_info.numberOfThreadBlocks; threadBlock_i++) {
                     // read completed requests from tb
-                    printf("TB %d, nextFetchedSlot= %d\n", threadBlock_i,
-                            nextFetchedSlot[threadBlock_i]);
+                    //printf("TB %d, nextFetchedSlot= %d\n", threadBlock_i,nextFetchedSlot[threadBlock_i]);
                     while (need_to_fetch(ctx, nextFetchedSlot, threadBlock_i)) {
 
                         int slotToDequeue = nextFetchedSlot[threadBlock_i];
                         int *currentRequestPerTbSlot = requestPerTbSlot + (threadBlock_i * Q_SLOTS);
                         int requestToDequeue = currentRequestPerTbSlot[slotToDequeue];
 
-                        dequeueJob(ctx, threadBlock_i, slotToDequeue, requestToDequeue, IMAGE_SIZE);
+                        dequeueJob(ctx, threadBlock_i, slotToDequeue, requestToDequeue,
+                                nextFetchedSlot, IMAGE_SIZE);
                         currentRequestPerTbSlot[slotToDequeue] = INVALID;
-                        nextFetchedSlot[threadBlock_i] = INCREASE_PC_POINTER(slotToDequeue);
                     }
                     if (chosenThreadBlock == INVALID && !isCPU2GPU_Full(ctx,
                                                                         threadBlock_i)) {
@@ -1041,14 +803,14 @@ void process_images(struct client_context *ctx) {
                 while (need_to_fetch(ctx, nextFetchedSlot, threadBlock_i)) {
                     int slotToDequeue = nextFetchedSlot[threadBlock_i];
                     int *currentRequestPerTbSlot = requestPerTbSlot + (threadBlock_i * Q_SLOTS);
-                    int rquestToDequeue = currentRequestPerTbSlot[slotToDequeue];
-                    dequeueJob(ctx, threadBlock_i, slotToDequeue, rquestToDequeue, IMAGE_SIZE);
+                    int requestToDequeue = currentRequestPerTbSlot[slotToDequeue];
+                    dequeueJob(ctx, threadBlock_i, slotToDequeue, requestToDequeue,
+                               nextFetchedSlot, IMAGE_SIZE);
                     currentRequestPerTbSlot[slotToDequeue] = INVALID;
-                    nextFetchedSlot[threadBlock_i] = INCREASE_PC_POINTER(slotToDequeue);
                 }
             }
         }
-        printf("before stops kernels\n");
+        //printf("before stops kernels\n");
         for (int threadBlock_i = 0;
              threadBlock_i < ctx->server_info.numberOfThreadBlocks; threadBlock_i++) {
             stopKernel(ctx, threadBlock_i);

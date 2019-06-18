@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include "common.h"
 
-#define NREQUESTS 50
+#define NREQUESTS 10000
 
 
 void process_image(uchar *img_in, uchar *img_out) {
@@ -351,7 +351,7 @@ enqueueJob(struct client_context *ctx, int threadBlock_i, int rquestToEnqueue, i
 
     cpu2gpu_wr.sg_list = &cpu2gpu_sgl;
     cpu2gpu_wr.num_sge = 1;
-    cpu2gpu_wr.opcode = IBV_WR_RDMA_WRITE_WITH_IMM;
+    cpu2gpu_wr.opcode = IBV_WR_RDMA_WRITE;
     cpu2gpu_wr.send_flags = IBV_SEND_SIGNALED;
     cpu2gpu_wr.wr.rdma.remote_addr = (uint64_t)(ctx->server_info.cpu2gpuQ +
                                                 ((threadBlock_i * Q_SLOTS +
@@ -398,7 +398,7 @@ enqueueJob(struct client_context *ctx, int threadBlock_i, int rquestToEnqueue, i
 
     producer_wr.sg_list = &producer_sgl;
     producer_wr.num_sge = 1;
-    producer_wr.opcode = IBV_WR_RDMA_WRITE_WITH_IMM;
+    producer_wr.opcode = IBV_WR_RDMA_WRITE;
     producer_wr.send_flags = IBV_SEND_SIGNALED;
     producer_wr.wr.rdma.remote_addr = (uint64_t)(ctx->server_info.producer +
                                                  threadBlock_i);
@@ -567,24 +567,26 @@ void stopKernel(struct client_context *ctx, int threadBlock_i) {
 
     /* send RDMA WRITE to server to update the producer index */
     memset(&producer_wr, 0, sizeof(struct ibv_send_wr));
-    producer_wr.wr_id = 2;
+    producer_wr.wr_id = 0;
     producer_sgl.addr = (uintptr_t) & (ctx->producer_buffers);
     producer_sgl.length = sizeof(int);
     producer_sgl.lkey = ctx->mr_producer_buffers->lkey;
 
     producer_wr.sg_list = &producer_sgl;
     producer_wr.num_sge = 1;
-    producer_wr.opcode = IBV_WR_RDMA_WRITE_WITH_IMM;
+    producer_wr.opcode = IBV_WR_RDMA_WRITE;
     producer_wr.send_flags = IBV_SEND_SIGNALED;
     producer_wr.wr.rdma.remote_addr = (uint64_t)(ctx->server_info.producer +
                                                  threadBlock_i);
     producer_wr.wr.rdma.rkey = ctx->server_info.producer_rkey;
-    producer_wr.imm_data = INVALID;
 
     if (ibv_post_send(ctx->qp, &producer_wr, &producer_bad_wr)) {
         printf("ERROR: ibv_post_send() for producer failed\n");
         exit(1);
     }
+
+    printf("stop kernels:");
+    printf("after RDMA send WRITE to stop kernel of %d\n",threadBlock_i);
 
     struct ibv_wc wc;
     int ncqes;
@@ -601,6 +603,9 @@ void stopKernel(struct client_context *ctx, int threadBlock_i) {
                wc.status, __LINE__);
         exit(1);
     }
+
+    printf("stop kernels:");
+    printf("after RDMA poll WRITE to stop kernel of %d\n",threadBlock_i);
     return;
 }
 
@@ -1043,6 +1048,7 @@ void process_images(struct client_context *ctx) {
                 }
             }
         }
+        printf("before stops kernels\n");
         for (int threadBlock_i = 0;
              threadBlock_i < ctx->server_info.numberOfThreadBlocks; threadBlock_i++) {
             stopKernel(ctx, threadBlock_i);

@@ -262,7 +262,7 @@ void allocate_memory(server_context *ctx)
     CUDA_CHECK(cudaHostAlloc(&ctx->images_out, OUTSTANDING_REQUESTS * IMAGE_SIZE, 0));
     ctx->requests = (rpc_request *)calloc(OUTSTANDING_REQUESTS, sizeof(rpc_request));
 
-    ctx->numberOfThreadBlocks = 1; //numOfThreadBlocksCalc();
+    ctx->numberOfThreadBlocks = numOfThreadBlocksCalc();
 
     CUDA_CHECK(cudaHostAlloc(&ctx->cpu2gpuQ, ctx->numberOfThreadBlocks * Q_SLOTS * IMAGE_SIZE, 0));
     CUDA_CHECK(cudaHostAlloc(&ctx->gpu2cpuQ, ctx->numberOfThreadBlocks * Q_SLOTS * IMAGE_SIZE, 0));
@@ -714,22 +714,6 @@ int main(int argc, char *argv[]) {
                                                   (producer_GPU_POINTER, consumer_GPU_POINTER, cpu2gpuQ_GPU_POINTER, gpu2cpuQ_GPU_POINTER);
 
         /* TODO run the GPU persistent kernel from hw2, for 1024 threads per block */
-
-        while (ctx.producer[ctx.numberOfThreadBlocks - 1] != INVALID){
-            struct ibv_wc wc;
-            int ncqes;
-            do {
-                ncqes = ibv_poll_cq(ctx.cq, 1, &wc);
-            } while (ncqes == 0);
-            if (ncqes < 0) {
-                printf("ERROR: ibv_poll_cq() failed\n");
-                exit(1);
-            }
-            if (wc.status != IBV_WC_SUCCESS) {
-                printf("ERROR: got CQE with error '%s' (%d) (line %d)\n", ibv_wc_status_str(wc.status), wc.status, __LINE__);
-                exit(1);
-            }
-        }
     }
 
     /* now finally we get to the actual work, in the event loop */
